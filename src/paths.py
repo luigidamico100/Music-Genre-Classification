@@ -9,7 +9,6 @@ path_raw_images_original = os.path.join(project_root_path, 'data', 'raw', 'image
 path_raw_features_3_sec = os.path.join(project_root_path, 'data', 'raw', 'features_3_sec.csv')
 path_raw_features_30_sec = os.path.join(project_root_path, 'data', 'raw', 'features_30_sec.csv')
 
-# Annotation dataframes
-path_annotation_wav_original = os.path.join(project_root_path, 'data', 'interim', 'annotation_wav.csv')
-path_annotation_images_original = os.path.join(project_root_path, 'data', 'interim', 'annotation_images.csv')
+# Annotation dataframe
+path_annotation_original = os.path.join(project_root_path, 'data', 'interim', 'annotation.csv')
 
