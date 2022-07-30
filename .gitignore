@@ -88,16 +88,23 @@ target/
 # Mypy cache
 .mypy_cache/
 
+*.rst
+docs/Makefile
+LICENSE
+Makefile
+tox.ini
 
+# data folder
 /data/*
+!/data
 !/data/.gitkeep
-!/data/preprocessed/
+!/data/processed/
 !data/interim/
 !/data/raw/
 !/data/external/
 
-/data/preprocessed/*
-!/data/preprocessed/.gitkeep
+/data/processed/*
+!/data/processed/.gitkeep
 
 /data/raw/*
 !/data/raw/.gitkeep
@@ -107,8 +114,3 @@ target/
 
 /data/interim/*
 !/data/interim/.gitkeep
-*.rst
-docs/Makefile
-LICENSE
-Makefile
-tox.ini
