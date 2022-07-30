@@ -1,4 +1,4 @@
-from src.paths import (
+from genre_classification.config import (
     path_raw_wav_original,
     path_raw_images_original,
     path_annotation_original,
