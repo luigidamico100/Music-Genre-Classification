@@ -1,4 +1,4 @@
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, DataLoader
 import pandas as pd
 import torchaudio
 import torch
@@ -28,10 +28,11 @@ class GTZANDataset(Dataset):
         genre = self.annotations.iloc[idx]['genre']
         label = self.genre_to_class[genre]
         signal, sr = torchaudio.load(sample_path)
+        signal = signal.to(self.device)
         signal = self.resample(signal, sr)
+        signal = self.mix_down(signal)
         signal = self.cut(signal)
         signal = self.right_pad(signal)
-        signal = signal.to(self.device)
         signal = self.transformation(signal)
         return signal, label
 
@@ -39,6 +40,11 @@ class GTZANDataset(Dataset):
         if sr != self.target_sample_rate:
             resampler = torchaudio.transforms.Resample(sr, self.target_sample_rate)
             signal = resampler(signal)
+        return signal
+
+    def mix_down(self, signal):
+        if signal.shape[0] > 1:
+            signal = torch.mean(signal, dim=0, keepdim=True)
         return signal
 
     def cut(self, signal):
@@ -54,3 +60,46 @@ class GTZANDataset(Dataset):
             last_dim_padding = (0, num_missing_samples)
             signal = torch.nn.functional.pad(signal, last_dim_padding)
         return signal
+
+def create_data_loader(dataset, batch_size):
+    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+    return dataloader
+
+
+if __name__ == "__main__":
+    from genre_classification.config import path_annotation_original, device
+
+    SAMPLE_RATE = 22050
+    NUM_SAMPLES = 22050 * 30 # Check this!
+    SAMPLE_LEN = 661794
+    BATCH_SIZE = 32
+
+
+    # ANNOTATIONS_FILE = "/home/valerio/datasets/UrbanSound8K/metadata/UrbanSound8K.csv"
+    # AUDIO_DIR = "/home/valerio/datasets/UrbanSound8K/audio"
+    # SAMPLE_RATE = 22050
+    # NUM_SAMPLES = 22050
+
+    mel_spectrogram = torchaudio.transforms.MelSpectrogram(
+        sample_rate=SAMPLE_RATE,
+        n_fft=1024,
+        hop_length=512,
+        n_mels=64
+    )
+
+    dataset = GTZANDataset(path_annotation_original,
+                           mel_spectrogram,
+                           SAMPLE_RATE,
+                           NUM_SAMPLES,
+                           device)
+
+    dataloader = create_data_loader(dataset, batch_size=BATCH_SIZE)
+    dataloader_it = iter(dataloader)
+    dataloader_out = next(dataloader_it)
+
+    print(f"There are {len(dataset)} samples in the dataset.")
+    signal, label = dataset[0]
+    print(signal.shape)
+    print(label)
+    print(dataloader_out[0].shape)
+    print(dataloader_out[1].shape)
