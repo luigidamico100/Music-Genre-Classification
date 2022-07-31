@@ -3,6 +3,49 @@ Music-Genre-Classification
 
 Music genre classification using CNN
 
+
+
+
+# Installation
+
+Place in the current directory. Clone the current conda environment or install package directly from requirements, then, install the project package. 
+
+### Cloning the code environment
+
+The conda environment has been exported using the command
+
+    conda env export > environment.yml
+
+Type the following instruction to clone the environment
+
+    conda env create -f environment.yml
+
+
+###  Install from requirements
+The requirements has been generated using
+
+    pip freeze > requirements.txt
+
+
+Install package requirements using pip 
+
+    pip install -r requirements.txt
+
+or conda
+
+    conda create --name <env_name> --file requirements.txt
+
+
+
+### Install the project package
+The project package can be install using
+
+    pip install -e .
+
+
+The project folder [genre_classification](genre_classification) is installed as a python package and it can be now referenced anywhere. 
+
+
 Project Organization
 ------------
 
