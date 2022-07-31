@@ -10,8 +10,12 @@ import pandas as pd
 def create_df_annotation(path_orig):
     list_dict = []
     for genre in os.listdir(path_orig):
+        if genre == '.DS_Store':
+            continue
         genre_fullpath = os.path.join(path_orig, genre)
         for filename in os.listdir(genre_fullpath):
+            if filename == '.DS_Store':
+                continue
             fullpath = os.path.join(genre_fullpath, filename)
             dict_sample = {'genre': genre, 'path': fullpath, 'filename': filename}
             list_dict.append(dict_sample)
@@ -32,7 +36,7 @@ def merge_annotations(df_annotation_wav, df_annotation_images):
         # Finding the associated image file
         wav_filename_split = wav_filename.split('.')
         image_filename = wav_filename_split[0] + wav_filename_split[1] + '.png'
-        df_annotation_images_row = df_annotation_images[df_annotation_images['filename']==image_filename]
+        df_annotation_images_row = df_annotation_images[df_annotation_images['filename'] == image_filename]
         if len(df_annotation_images_row) == 1:
             dict_sample['image_path'] = df_annotation_images_row['path'].item()
             dict_sample['image_filename'] = df_annotation_images_row['filename'].item()
@@ -58,8 +62,12 @@ def main():
 
     df_annotation = merge_annotations(df_annotation_wav, df_annotation_images)
 
+    # jazz.00054.wav file cannot be opened
+    df_annotation = df_annotation[df_annotation['wav_filename'] != 'jazz.00054.wav']
+
     print(f'Writing annotation files to: {path_annotation_original}')
     df_annotation.to_csv(path_annotation_original)
+
 
 if __name__ == '__main__':
     main()
