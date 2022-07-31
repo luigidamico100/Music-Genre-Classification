@@ -14,6 +14,9 @@ path_raw_features_30_sec = os.path.join(project_root_path, 'data', 'raw', 'featu
 # Annotation dataframe
 path_annotation_original = os.path.join(project_root_path, 'data', 'interim', 'annotation.csv')
 
+# Model
+path_model = os.path.join(project_root_path, 'models', 'feedforwardnet.pth')
+
 ##########################################################################################################
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
