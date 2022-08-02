@@ -4,7 +4,7 @@ from torch import nn
 from torch.utils.data import DataLoader
 
 from genre_classification.models import dataset
-from genre_classification.models.cnn import  CNNNetwork
+from genre_classification.models.cnn import CNNNetwork
 from genre_classification.models.dataset import create_data_loader, GTZANDataset
 
 from genre_classification.config import path_annotation_original, device, path_model
@@ -64,7 +64,7 @@ if __name__ == "__main__":
     cnn = CNNNetwork().to(device)
     print(cnn)
 
-    # initialise loss funtion + optimiser
+    # initialise loss function + optimiser
     loss_fn = nn.CrossEntropyLoss()
     optimiser = torch.optim.Adam(cnn.parameters(),
                                  lr=LEARNING_RATE)
