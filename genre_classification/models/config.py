@@ -6,7 +6,7 @@ print(f"Using device {device}")
 # Model training
 
 batch_size = 128
-epochs = 100
+epochs = 15
 learning_rate = 0.001
 
 sample_rate = 22050
