@@ -1,6 +1,5 @@
 from torch import nn
 from torchinfo import summary
-from genre_classification.paths import device
 import torch.nn.functional as F
 
 
@@ -10,6 +9,7 @@ class CNNNetwork(nn.Module):
         super().__init__()
         self.print_forward_tensors_shape = print_forward_tensors_shape
 
+        self.batch_normalization = nn.BatchNorm2d(1)
         # 4 conv blocks / flatten / linear / softmax
         self.conv1 = nn.Sequential(
             nn.Conv2d(
@@ -71,7 +71,13 @@ class CNNNetwork(nn.Module):
         self.softmax = nn.Softmax(dim=1)
 
     def forward(self, input_data):
-        x = self.conv1(input_data)
+        x = input_data
+        if self.print_forward_tensors_shape:
+            print(x.shape)
+        x = self.batch_normalization(x)
+        if self.print_forward_tensors_shape:
+            print(x.shape)
+        x = self.conv1(x)
         if self.print_forward_tensors_shape:
             print(x.shape)
         x = self.conv2(x)
@@ -183,7 +189,7 @@ class CNNNetwork_original(nn.Module):
 
 
 if __name__ == "__main__":
-    from genre_classification.paths import device
+    from genre_classification.models.config import device
     cnn = CNNNetwork(print_forward_tensors_shape=True).to(device)
     summary(cnn, (1, 1, 64, 44))
 
