@@ -67,7 +67,7 @@ def create_data_loader(dataset, batch_size):
 
 
 if __name__ == "__main__":
-    from genre_classification.config import path_annotation_original, device
+    from genre_classification.paths import path_annotation_original, device
 
     SAMPLE_RATE = 22050
     NUM_SAMPLES = 22050 * 30 # Check this!

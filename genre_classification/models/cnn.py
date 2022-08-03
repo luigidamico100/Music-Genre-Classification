@@ -1,6 +1,6 @@
 from torch import nn
 from torchinfo import summary
-from genre_classification.config import device
+from genre_classification.paths import device
 import torch.nn.functional as F
 
 
@@ -183,7 +183,7 @@ class CNNNetwork_original(nn.Module):
 
 
 if __name__ == "__main__":
-    from genre_classification.config import device
+    from genre_classification.paths import device
     cnn = CNNNetwork(print_forward_tensors_shape=True).to(device)
     summary(cnn, (1, 1, 64, 44))
 
