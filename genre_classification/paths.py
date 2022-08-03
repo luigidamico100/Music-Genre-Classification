@@ -17,6 +17,3 @@ path_annotation_original = os.path.join(project_root_path, 'data', 'interim', 'a
 # Model
 path_model = os.path.join(project_root_path, 'models', 'feedforwardnet.pth')
 ##########################################################################################################
-
-device = "cuda" if torch.cuda.is_available() else "cpu"
-print(f"Using device {device}")

@@ -3,15 +3,15 @@ import torchaudio
 from torch import nn
 from genre_classification.models.cnn import CNNNetwork
 from genre_classification.models.dataset import create_data_loader, GTZANDataset
-from genre_classification.paths import path_annotation_original, device, path_model
-
-
-BATCH_SIZE = 128
-EPOCHS = 100
-LEARNING_RATE = 0.001
-
-SAMPLE_RATE = 22050
-NUM_SAMPLES = 661794
+from genre_classification.paths import path_annotation_original, path_model
+from genre_classification.models.config import (
+    device,
+    batch_size,
+    epochs,
+    learning_rate,
+    sample_rate,
+    num_samples,
+)
 
 
 def train_single_epoch(model, data_loader, loss_fn, optimiser, device):
@@ -39,10 +39,9 @@ def train(model, data_loader, loss_fn, optimiser, device, epochs):
 
 
 if __name__ == "__main__":
-
     # instantiating our dataset object and create data loader
     mel_spectrogram = torchaudio.transforms.MelSpectrogram(
-        sample_rate=SAMPLE_RATE,
+        sample_rate=sample_rate,
         n_fft=1024,
         hop_length=512,
         n_mels=64
@@ -50,11 +49,11 @@ if __name__ == "__main__":
 
     usd = GTZANDataset(path_annotation_original,
                        mel_spectrogram,
-                       SAMPLE_RATE,
-                       NUM_SAMPLES,
+                       sample_rate,
+                       num_samples,
                        device)
 
-    train_dataloader = create_data_loader(usd, BATCH_SIZE)
+    train_dataloader = create_data_loader(usd, batch_size)
 
     # construct model and assign it to device
     cnn = CNNNetwork().to(device)
@@ -63,12 +62,11 @@ if __name__ == "__main__":
     # initialise loss function + optimiser
     loss_fn = nn.CrossEntropyLoss()
     optimiser = torch.optim.Adam(cnn.parameters(),
-                                 lr=LEARNING_RATE)
+                                 lr=learning_rate)
 
     # train model
-    train(cnn, train_dataloader, loss_fn, optimiser, device, EPOCHS)
+    train(cnn, train_dataloader, loss_fn, optimiser, device, epochs)
 
     # save model
     torch.save(cnn.state_dict(), path_model)
     print(f"Saving model to {path_model}")
-
