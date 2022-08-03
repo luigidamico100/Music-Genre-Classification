@@ -1,6 +1,7 @@
 import torch
 import torchaudio
 from torch import nn
+from torchinfo import summary
 from genre_classification.models.cnn import CNNNetwork
 from genre_classification.models.dataset import create_data_loader, GTZANDataset
 from genre_classification.paths import path_annotation_original, path_model
@@ -58,6 +59,7 @@ if __name__ == "__main__":
     # construct model and assign it to device
     cnn = CNNNetwork().to(device)
     print(cnn)
+    summary(cnn, (1, 1, 400, 400))
 
     # initialise loss function + optimiser
     loss_fn = nn.CrossEntropyLoss()
