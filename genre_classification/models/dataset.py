@@ -8,11 +8,14 @@ class GTZANDataset(Dataset):
 
     def __init__(self,
                  annotations_file_path,
+                 n_samples=None,
                  transformation=None,
                  target_sample_rate=None,
                  num_samples=None,
                  device=None):
         self.annotations = pd.read_csv(annotations_file_path, index_col=0)
+        if n_samples:
+            self.annotations = self.annotations.sample(n_samples, random_state=42)
         self.device = device
         self.target_sample_rate = target_sample_rate
         self.num_samples = num_samples
@@ -67,33 +70,33 @@ def create_data_loader(dataset, batch_size):
 
 
 if __name__ == "__main__":
-    from genre_classification.paths import path_annotation_original, device
-
-    SAMPLE_RATE = 22050
-    NUM_SAMPLES = 22050 * 30 # Check this!
-    SAMPLE_LEN = 661794
-    BATCH_SIZE = 32
-
-
-    # ANNOTATIONS_FILE = "/home/valerio/datasets/UrbanSound8K/metadata/UrbanSound8K.csv"
-    # AUDIO_DIR = "/home/valerio/datasets/UrbanSound8K/audio"
-    # SAMPLE_RATE = 22050
-    # NUM_SAMPLES = 22050
+    import numpy as np
+    from genre_classification.paths import path_annotation_original
+    from genre_classification.models.config import (
+        device,
+        batch_size,
+        epochs,
+        learning_rate,
+        sample_rate,
+        num_samples,
+    )
 
     mel_spectrogram = torchaudio.transforms.MelSpectrogram(
-        sample_rate=SAMPLE_RATE,
+        sample_rate=sample_rate,
         n_fft=1024,
         hop_length=512,
-        n_mels=64
+        n_mels=64,
+        normalized=False
     )
 
     dataset = GTZANDataset(path_annotation_original,
-                           mel_spectrogram,
-                           SAMPLE_RATE,
-                           NUM_SAMPLES,
-                           device)
+                       n_samples=None,
+                       transformation=mel_spectrogram,
+                       target_sample_rate=sample_rate,
+                       num_samples=num_samples,
+                       device=device)
 
-    dataloader = create_data_loader(dataset, batch_size=BATCH_SIZE)
+    dataloader = create_data_loader(dataset, batch_size=batch_size)
     dataloader_it = iter(dataloader)
     dataloader_out = next(dataloader_it)
 
@@ -103,3 +106,5 @@ if __name__ == "__main__":
     print(label)
     print(dataloader_out[0].shape)
     print(dataloader_out[1].shape)
+
+    mel_spectrogram_sample = np.array(dataloader_out[0][0][0])

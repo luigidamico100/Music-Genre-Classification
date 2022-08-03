@@ -49,10 +49,11 @@ if __name__ == "__main__":
     )
 
     usd = GTZANDataset(path_annotation_original,
-                       mel_spectrogram,
-                       sample_rate,
-                       num_samples,
-                       device)
+                       n_samples=None,
+                       transformation=mel_spectrogram,
+                       target_sample_rate=sample_rate,
+                       num_samples=num_samples,
+                       device=device)
 
     train_dataloader = create_data_loader(usd, batch_size)
 
