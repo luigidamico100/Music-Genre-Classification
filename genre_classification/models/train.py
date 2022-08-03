@@ -2,6 +2,7 @@ import torch
 import torchaudio
 from torch import nn
 from torchinfo import summary
+from torchmetrics import Accuracy
 from genre_classification.models.cnn import CNNNetwork
 from genre_classification.models.dataset import create_data_loader, GTZANDataset
 from genre_classification.paths import path_annotation_original, path_model
@@ -15,8 +16,8 @@ from genre_classification.models.config import (
 )
 
 
-def train_single_epoch(model, data_loader, loss_fn, optimiser, device):
-    for input, target in data_loader:
+def train_single_epoch(model, dataloader, loss_fn, optimiser, device):
+    for input, target in dataloader:
         input, target = input.to(device), target.to(device)
 
         # calculate loss
@@ -30,11 +31,31 @@ def train_single_epoch(model, data_loader, loss_fn, optimiser, device):
 
     print(f"loss: {loss.item()}")
 
+def validate_single_epoch(model, dataloader, loss_fn, device):
+    accuracy = Accuracy()
+    prediction_overall = torch.empty((0,))
+    target_overall = torch.empty((0,))
+    for input, target in dataloader:
+        input, target = input.to(device), target.to(device)
+        model.eval()
 
-def train(model, data_loader, loss_fn, optimiser, device, epochs):
+        # calculate loss
+        prediction = model(input)
+        loss = loss_fn(prediction, target)
+
+        _, predicted = torch.max(prediction.data, dim=1)
+
+        prediction_overall = torch.cat((prediction_overall, predicted))
+        target_overall = torch.cat((target_overall, target))
+
+    accuracy_overall = accuracy(prediction_overall.type(torch.int64), target_overall.type(torch.int64))
+    print(f'Validation\t->\tLoss: {loss.item()}\tAcc: {accuracy_overall.item()},')
+
+def train(model, train_dataloader, val_dataloader, loss_fn, optimiser, device, epochs):
     for i in range(epochs):
         print(f"Epoch {i + 1}")
-        train_single_epoch(model, data_loader, loss_fn, optimiser, device)
+        train_single_epoch(model, train_dataloader, loss_fn, optimiser, device)
+        validate_single_epoch(model, val_dataloader, loss_fn, device)
         print("---------------------------")
     print("Finished training")
 
@@ -68,7 +89,13 @@ if __name__ == "__main__":
                                  lr=learning_rate)
 
     # train model
-    train(cnn, train_dataloader, loss_fn, optimiser, device, epochs)
+    train(model=cnn,
+          train_dataloader=train_dataloader,
+          val_dataloader=train_dataloader,
+          loss_fn=loss_fn,
+          optimiser=optimiser,
+          device=device,
+          epochs=epochs)
 
     # save model
     torch.save(cnn.state_dict(), path_model)
