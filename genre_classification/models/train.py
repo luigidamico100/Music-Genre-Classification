@@ -3,6 +3,7 @@ import torchaudio
 from torch import nn
 from torchinfo import summary
 from torchmetrics import Accuracy
+import numpy as np
 from genre_classification.models.cnn import CNNNetwork
 from genre_classification.models.dataset import create_data_loader, GTZANDataset
 from genre_classification.paths import path_annotation_original, path_model
@@ -17,39 +18,54 @@ from genre_classification.models.config import (
 
 
 def train_single_epoch(model, dataloader, loss_fn, optimiser, device):
-    for input, target in dataloader:
-        input, target = input.to(device), target.to(device)
-
-        # calculate loss
-        prediction = model(input)
-        loss = loss_fn(prediction, target)
-
-        # backpropagate error and update weights
-        optimiser.zero_grad()
-        loss.backward()
-        optimiser.step()
-
-    print(f"loss: {loss.item()}")
-
-def validate_single_epoch(model, dataloader, loss_fn, device):
+    model.train()
     accuracy = Accuracy()
-    prediction_overall = torch.empty((0,))
-    target_overall = torch.empty((0,))
+    losses = []
+    prediction_overall = torch.empty((0,)).to(device)
+    target_overall = torch.empty((0,)).to(device)
+
     for input, target in dataloader:
         input, target = input.to(device), target.to(device)
-        model.eval()
 
         # calculate loss
         prediction = model(input)
         loss = loss_fn(prediction, target)
 
         _, predicted = torch.max(prediction.data, dim=1)
-
         prediction_overall = torch.cat((prediction_overall, predicted))
         target_overall = torch.cat((target_overall, target))
 
+        # backpropagate error and update weights
+        optimiser.zero_grad()
+        loss.backward()
+        optimiser.step()
+        losses.append(loss.item())
+
     accuracy_overall = accuracy(prediction_overall.type(torch.int64), target_overall.type(torch.int64))
-    print(f'Validation\t->\tLoss: {loss.item()}\tAcc: {accuracy_overall.item()},')
+    print(f'Training\t->\tLoss: {np.mean(losses):.3f}\tAcc: {accuracy_overall.item():.3f},')
+
+def validate_single_epoch(model, dataloader, loss_fn, device):
+    model.eval()
+    accuracy = Accuracy()
+    prediction_overall = torch.empty((0,)).to(device)
+    target_overall = torch.empty((0,)).to(device)
+    losses = []
+    with torch.no_grad():
+        for input, target in dataloader:
+            input, target = input.to(device), target.to(device)
+
+            # calculate loss
+            prediction = model(input)
+            loss = loss_fn(prediction, target)
+
+            _, predicted = torch.max(prediction.data, dim=1)
+
+            prediction_overall = torch.cat((prediction_overall, predicted))
+            target_overall = torch.cat((target_overall, target))
+            losses.append(loss.item())
+
+    accuracy_overall = accuracy(prediction_overall.type(torch.int64), target_overall.type(torch.int64))
+    print(f'Validation\t->\tLoss: {np.mean(losses):.3f}\tAcc: {accuracy_overall.item():.3f},')
 
 def train(model, train_dataloader, val_dataloader, loss_fn, optimiser, device, epochs):
     for i in range(epochs):
