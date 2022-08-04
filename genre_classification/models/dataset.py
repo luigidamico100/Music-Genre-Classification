@@ -2,6 +2,7 @@ from torch.utils.data import Dataset, DataLoader
 import pandas as pd
 import torchaudio
 import torch
+import random
 
 
 class GTZANDataset(Dataset):
@@ -50,10 +51,17 @@ class GTZANDataset(Dataset):
             signal = torch.mean(signal, dim=0, keepdim=True)
         return signal
 
-    def cut(self, signal):
+    def cut_old(self, signal):
         length_signal = signal.shape[1]
         if length_signal > self.num_samples:
             signal = signal[:, :self.num_samples]
+        return signal
+
+    def cut(self, signal):
+        length_signal = signal.shape[1]
+        if length_signal > self.num_samples:
+            random_index = random.randint(0, length_signal - self.num_samples - 1)
+            signal = signal[:, random_index:random_index+self.num_samples]
         return signal
 
     def right_pad(self, signal):
