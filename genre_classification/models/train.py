@@ -9,6 +9,7 @@ import argparse
 import seaborn as sns
 import pandas as pd
 import os
+import time
 from genre_classification.models.cnn import CNNNetwork
 from genre_classification.models.dataset import create_data_loader, GTZANDataset
 from genre_classification.paths import path_annotation_original, path_training_experiments, experiment_name
@@ -83,12 +84,14 @@ def validate_single_epoch(model, dataloader, loss_fn, device):
 def train(model, train_dataloader, val_dataloader, loss_fn, optimiser, device, epochs):
     train_data = []
     val_data = []
+    start_time = time.time()
     for i in range(epochs):
         print(f"Epoch {i + 1}")
         train_data.append(train_single_epoch(model, train_dataloader, loss_fn, optimiser, device))
         val_data.append(validate_single_epoch(model, val_dataloader, loss_fn, device))
         print("---------------------------")
-    print("Finished training")
+    end_time = time.time()
+    print(f"Finished training. Elapsed time: {(end_time-start_time)/60.:.2f} mins")
 
     train_data = np.array(train_data)
     val_data = np.array(val_data)
@@ -173,7 +176,7 @@ if __name__ == "__main__":
                                                      num_samples=num_samples,
                                                      device=device,
                                                      batch_size=batch_size,
-                                                     usage='train')
+                                                     usage='val')
 
     # construct model and assign it to device
     cnn = CNNNetwork().to(device)
