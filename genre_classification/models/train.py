@@ -5,12 +5,13 @@ from torchinfo import summary
 from torchmetrics import Accuracy
 import numpy as np
 import matplotlib.pyplot as plt
-import pickle
+import argparse
 import seaborn as sns
 import pandas as pd
+import os
 from genre_classification.models.cnn import CNNNetwork
 from genre_classification.models.dataset import create_data_loader, GTZANDataset
-from genre_classification.paths import path_annotation_original, path_experiment
+from genre_classification.paths import path_annotation_original, path_training_experiments, experiment_name
 from genre_classification.models.config import (
     device,
     batch_size,
@@ -18,7 +19,7 @@ from genre_classification.models.config import (
     learning_rate,
     sample_rate,
     num_samples,
-    debug
+    train_debug_mode,
 )
 
 
@@ -127,6 +128,18 @@ def save_training_data(df_training_data, path_experiment=None, model=None):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Training process')
+    parser.add_argument('--epochs', type=int, help='epochs number', default=epochs)
+    parser.add_argument('--train_debug_mode', type=bool, help='Train debug mode', default=train_debug_mode)
+    parser.add_argument('--learning_rate', type=float, help='training learning rate', default=learning_rate)
+    parser.add_argument('--experiment_name', type=str, help='experiment name', default=experiment_name)
+    args = parser.parse_args()
+    epochs = args.epochs
+    train_debug_mode = args.train_debug_mode
+    learning_rate = args.learning_rate
+    experiment_name = args.experiment_name
+    path_training_experiment = os.path.join(path_training_experiments, experiment_name)
+
     # instantiating our dataset object and create data loader
     mel_spectrogram = torchaudio.transforms.MelSpectrogram(
         sample_rate=sample_rate,
@@ -143,7 +156,7 @@ if __name__ == "__main__":
                        device=device)
 
     train_dataloader, train_dataset = create_data_loader(path_annotation_original,
-                                                         n_samples=10 if debug else None,
+                                                         n_samples=10 if train_debug_mode else None,
                                                          transformation=mel_spectrogram,
                                                          target_sample_rate=sample_rate,
                                                          num_samples=num_samples,
@@ -152,7 +165,7 @@ if __name__ == "__main__":
                                                          usage='train')
 
     val_dataloader, val_dataset = create_data_loader(path_annotation_original,
-                                                     n_samples=10 if debug else None,
+                                                     n_samples=10 if train_debug_mode else None,
                                                      transformation=mel_spectrogram,
                                                      target_sample_rate=sample_rate,
                                                      num_samples=num_samples,
@@ -179,5 +192,5 @@ if __name__ == "__main__":
                           device=device,
                           epochs=epochs)
 
-    save_training_data(df_training_data, path_experiment=path_experiment, model=cnn)
+    save_training_data(df_training_data, path_experiment=path_training_experiment, model=cnn)
 
