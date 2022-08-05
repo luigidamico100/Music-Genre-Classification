@@ -115,4 +115,4 @@ tox.ini
 /data/interim/*
 !/data/interim/.gitkeep
 
-*.pth
+/models/*
