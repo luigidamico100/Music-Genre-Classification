@@ -7,7 +7,7 @@ print(f"Using device {device}")
 debug = False
 
 batch_size = 128
-epochs = 20
+epochs = 100
 learning_rate = 0.001
 
 sample_rate = 22050
