@@ -6,6 +6,7 @@ import torch.nn.functional as F
 class CNNNetwork(nn.Module):
 
     def __init__(self, print_forward_tensors_shape=False):
+        # TODO: Insert batch normalization between conv e relu
         super().__init__()
         self.print_forward_tensors_shape = print_forward_tensors_shape
 
@@ -89,10 +90,10 @@ class CNNNetwork(nn.Module):
         x = self.conv4(x)
         if self.print_forward_tensors_shape:
             print(x.shape)
-        x = self.conv5(x)
-        if self.print_forward_tensors_shape:
-            print(x.shape)
-            print('--- end of conv layers ---')
+        # x = self.conv5(x)
+        # if self.print_forward_tensors_shape:
+        #     print(x.shape)
+        #     print('--- end of conv layers ---')
         x = F.max_pool2d(x, kernel_size=x.shape[2:])
         if self.print_forward_tensors_shape:
             print(x.shape)
