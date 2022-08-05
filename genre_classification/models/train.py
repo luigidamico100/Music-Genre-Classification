@@ -10,7 +10,7 @@ import seaborn as sns
 import pandas as pd
 from genre_classification.models.cnn import CNNNetwork
 from genre_classification.models.dataset import create_data_loader, GTZANDataset
-from genre_classification.paths import path_annotation_original, path_model, path_training_data
+from genre_classification.paths import path_annotation_original, path_model, path_df_training_data
 from genre_classification.models.config import (
     device,
     batch_size,
@@ -99,7 +99,7 @@ def train(model, train_dataloader, val_dataloader, loss_fn, optimiser, device, e
     return df_training_data
 
 
-def plot_training_data(df_training_data, path_training_data=None):
+def plot_training_data(df_training_data, path_df_training_data=None):
     fix, axs = plt.subplots(2, 1)
     sns.lineplot(data=df_training_data, x=df_training_data.index, y='train_loss', label='train_loss', ax=axs[0])
     sns.lineplot(data=df_training_data, x=df_training_data.index, y='val_loss', label='val_loss', ax=axs[0])
@@ -109,9 +109,9 @@ def plot_training_data(df_training_data, path_training_data=None):
     axs[1].set_ylabel('Accuracy')
     plt.plot()
 
-    if path_training_data:
-        print(f'Saving df_training_data to {path_training_data}')
-        df_training_data.to_csv(path_training_data)
+    if path_df_training_data:
+        print(f'Saving df_training_data to {path_df_training_data}')
+        df_training_data.to_csv(path_df_training_data)
 
 
 if __name__ == "__main__":
@@ -167,7 +167,7 @@ if __name__ == "__main__":
                           device=device,
                           epochs=epochs)
 
-    plot_training_data(df_training_data, path_training_data=path_training_data)
+    plot_training_data(df_training_data, path_df_training_data=path_df_training_data)
 
     # save model
     print(f"Saving model to {path_model}")
