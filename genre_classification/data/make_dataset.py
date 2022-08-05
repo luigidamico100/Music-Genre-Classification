@@ -5,6 +5,7 @@ from genre_classification.paths import (
 )
 import os
 import pandas as pd
+from sklearn.model_selection import StratifiedKFold
 
 
 def create_df_annotation(path_orig):
@@ -56,11 +57,24 @@ def merge_annotations(df_annotation_wav, df_annotation_images):
     return df_annotation
 
 
+def add_fold_column(df_annotation, val_size=.2, test_size=.2):
+    X = df_annotation.drop('genre', axis=1)
+    y = df_annotation['genre']
+
+    skf = StratifiedKFold(n_splits=20, shuffle=True)
+    df_annotation['fold'] = -1
+
+    for fold, (train_idxs, test_idxs) in enumerate(skf.split(X, y)):
+        df_annotation.loc[df_annotation.index[test_idxs], 'fold'] = fold
+
+    return df_annotation
+
+
 def main():
     df_annotation_wav = create_df_annotation(path_raw_wav_original)
     df_annotation_images = create_df_annotation(path_raw_images_original)
-
     df_annotation = merge_annotations(df_annotation_wav, df_annotation_images)
+    df_annotation = add_fold_column(df_annotation)
 
     # jazz.00054.wav file cannot be opened
     df_annotation = df_annotation[df_annotation['wav_filename'] != 'jazz.00054.wav']

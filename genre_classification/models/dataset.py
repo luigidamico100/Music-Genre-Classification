@@ -13,8 +13,11 @@ class GTZANDataset(Dataset):
                  transformation=None,
                  target_sample_rate=None,
                  num_samples=None,
-                 device=None):
+                 device=None,
+                 folds=[0, 1, 2, 3, 4, 5]):
+
         self.annotations = pd.read_csv(annotations_file_path, index_col=0)
+        self.annotations = self.annotations[self.annotations['fold'].isin(folds)]
         if n_samples:
             self.annotations = self.annotations.sample(n_samples, random_state=42)
         self.device = device
@@ -61,7 +64,7 @@ class GTZANDataset(Dataset):
         length_signal = signal.shape[1]
         if length_signal > self.num_samples:
             random_index = random.randint(0, length_signal - self.num_samples - 1)
-            signal = signal[:, random_index:random_index+self.num_samples]
+            signal = signal[:, random_index:random_index + self.num_samples]
         return signal
 
     def right_pad(self, signal):
@@ -72,9 +75,34 @@ class GTZANDataset(Dataset):
             signal = torch.nn.functional.pad(signal, last_dim_padding)
         return signal
 
-def create_data_loader(dataset, batch_size):
+
+def create_data_loader(path_annotation_original,
+                       n_samples=None,
+                       transformation=None,
+                       target_sample_rate=None,
+                       num_samples=None,
+                       device='cpu',
+                       batch_size=64,
+                       usage='train'):
+    if usage == 'train':
+        folds = list(range(0, 14))
+    elif usage == 'val':
+        folds = [14, 15, 16]
+    elif usage == 'test':
+        folds = [17, 18, 19]
+    else:
+        raise ValueError
+
+    dataset = GTZANDataset(path_annotation_original,
+                           n_samples=n_samples,
+                           transformation=transformation,
+                           target_sample_rate=target_sample_rate,
+                           num_samples=num_samples,
+                           device=device,
+                           folds=folds)
+
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
-    return dataloader
+    return dataloader, dataset
 
 
 if __name__ == "__main__":
@@ -83,8 +111,6 @@ if __name__ == "__main__":
     from genre_classification.models.config import (
         device,
         batch_size,
-        epochs,
-        learning_rate,
         sample_rate,
         num_samples,
     )
@@ -97,14 +123,15 @@ if __name__ == "__main__":
         normalized=False
     )
 
-    dataset = GTZANDataset(path_annotation_original,
-                       n_samples=None,
-                       transformation=mel_spectrogram,
-                       target_sample_rate=sample_rate,
-                       num_samples=num_samples,
-                       device=device)
+    dataloader, dataset = create_data_loader(path_annotation_original,
+                                             n_samples=None,
+                                             transformation=mel_spectrogram,
+                                             target_sample_rate=sample_rate,
+                                             num_samples=num_samples,
+                                             device=device,
+                                             batch_size=batch_size,
+                                             usage='val')
 
-    dataloader = create_data_loader(dataset, batch_size=batch_size)
     dataloader_it = iter(dataloader)
     dataloader_out = next(dataloader_it)
 
@@ -115,4 +142,4 @@ if __name__ == "__main__":
     print(dataloader_out[0].shape)
     print(dataloader_out[1].shape)
 
-    mel_spectrogram_sample = np.array(dataloader_out[0][0][0])
+    sample = np.array(dataloader_out[0][0][0])
