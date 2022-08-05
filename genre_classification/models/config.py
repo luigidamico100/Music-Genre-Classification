@@ -4,6 +4,7 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 print(f"Using device {device}")
 
 # Model training
+debug = True
 
 batch_size = 128
 epochs = 15

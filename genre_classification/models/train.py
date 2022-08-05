@@ -4,7 +4,10 @@ from torch import nn
 from torchinfo import summary
 from torchmetrics import Accuracy
 import numpy as np
+import matplotlib.pyplot as plt
 import pickle
+import seaborn as sns
+import pandas as pd
 from genre_classification.models.cnn import CNNNetwork
 from genre_classification.models.dataset import create_data_loader, GTZANDataset
 from genre_classification.paths import path_annotation_original, path_model, path_training_data
@@ -15,6 +18,7 @@ from genre_classification.models.config import (
     learning_rate,
     sample_rate,
     num_samples,
+    debug
 )
 
 
@@ -42,9 +46,9 @@ def train_single_epoch(model, dataloader, loss_fn, optimiser, device):
         optimiser.step()
         losses.append(loss.item())
 
-    accuracy_overall = accuracy(prediction_overall.type(torch.int64), target_overall.type(torch.int64))
+    accuracy_overall = accuracy(prediction_overall.type(torch.int64), target_overall.type(torch.int64)).item()
     loss_overall = np.mean(losses)
-    print(f'Training\t->\tLoss: {loss_overall:.3f}\tAcc: {accuracy_overall.item():.3f},')
+    print(f'Training\t->\tLoss: {loss_overall:.3f}\tAcc: {accuracy_overall:.3f},')
     return loss_overall, accuracy_overall
 
 
@@ -68,9 +72,9 @@ def validate_single_epoch(model, dataloader, loss_fn, device):
             target_overall = torch.cat((target_overall, target))
             losses.append(loss.item())
 
-    accuracy_overall = accuracy(prediction_overall.type(torch.int64), target_overall.type(torch.int64))
+    accuracy_overall = accuracy(prediction_overall.type(torch.int64), target_overall.type(torch.int64)).item()
     loss_overall = np.mean(losses)
-    print(f'Validation\t->\tLoss: {loss_overall:.3f}\tAcc: {accuracy_overall.item():.3f},')
+    print(f'Validation\t->\tLoss: {loss_overall:.3f}\tAcc: {accuracy_overall:.3f},')
 
     return loss_overall, accuracy_overall
 
@@ -84,7 +88,30 @@ def train(model, train_dataloader, val_dataloader, loss_fn, optimiser, device, e
         val_data.append(validate_single_epoch(model, val_dataloader, loss_fn, device))
         print("---------------------------")
     print("Finished training")
-    return train_data, val_data
+
+    train_data = np.array(train_data)
+    val_data = np.array(val_data)
+    training_data = np.concatenate((train_data, val_data), axis=1)
+    df_training_data = pd.DataFrame(training_data, columns=['train_loss', 'train_acc', 'val_loss', 'val_acc'])
+    df_training_data.index = df_training_data.index+1
+    df_training_data.index.name = 'epoch'
+
+    return df_training_data
+
+
+def plot_training_data(df_training_data, path_training_data=None):
+    fix, axs = plt.subplots(2, 1)
+    sns.lineplot(data=df_training_data, x=df_training_data.index, y='train_loss', label='train_loss', ax=axs[0])
+    sns.lineplot(data=df_training_data, x=df_training_data.index, y='val_loss', label='val_loss', ax=axs[0])
+    axs[0].set_ylabel('Loss')
+    sns.lineplot(data=df_training_data, x=df_training_data.index, y='train_acc', label='train_acc', ax=axs[1])
+    sns.lineplot(data=df_training_data, x=df_training_data.index, y='val_acc', label='val_acc', ax=axs[1])
+    axs[1].set_ylabel('Accuracy')
+    plt.plot()
+
+    if path_training_data:
+        print(f'Saving df_training_data to {path_training_data}')
+        df_training_data.to_csv(path_training_data)
 
 
 if __name__ == "__main__":
@@ -104,7 +131,7 @@ if __name__ == "__main__":
                        device=device)
 
     train_dataloader, train_dataset = create_data_loader(path_annotation_original,
-                                                         n_samples=None,
+                                                         n_samples=10 if debug else None,
                                                          transformation=mel_spectrogram,
                                                          target_sample_rate=sample_rate,
                                                          num_samples=num_samples,
@@ -113,7 +140,7 @@ if __name__ == "__main__":
                                                          usage='train')
 
     val_dataloader, val_dataset = create_data_loader(path_annotation_original,
-                                                     n_samples=None,
+                                                     n_samples=10 if debug else None,
                                                      transformation=mel_spectrogram,
                                                      target_sample_rate=sample_rate,
                                                      num_samples=num_samples,
@@ -132,7 +159,7 @@ if __name__ == "__main__":
                                  lr=learning_rate)
 
     # train model
-    training_data = train(model=cnn,
+    df_training_data = train(model=cnn,
                           train_dataloader=train_dataloader,
                           val_dataloader=val_dataloader,
                           loss_fn=loss_fn,
@@ -140,8 +167,8 @@ if __name__ == "__main__":
                           device=device,
                           epochs=epochs)
 
+    plot_training_data(df_training_data, path_training_data=path_training_data)
+
     # save model
     print(f"Saving model to {path_model}")
     torch.save(cnn.state_dict(), path_model)
-    with open(path_training_data, 'wb') as f:
-        pickle.dump(f, training_data)
