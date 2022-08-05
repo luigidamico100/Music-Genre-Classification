@@ -4,9 +4,10 @@ from torch import nn
 from torchinfo import summary
 from torchmetrics import Accuracy
 import numpy as np
+import pickle
 from genre_classification.models.cnn import CNNNetwork
 from genre_classification.models.dataset import create_data_loader, GTZANDataset
-from genre_classification.paths import path_annotation_original, path_model
+from genre_classification.paths import path_annotation_original, path_model, path_training_data
 from genre_classification.models.config import (
     device,
     batch_size,
@@ -42,7 +43,9 @@ def train_single_epoch(model, dataloader, loss_fn, optimiser, device):
         losses.append(loss.item())
 
     accuracy_overall = accuracy(prediction_overall.type(torch.int64), target_overall.type(torch.int64))
-    print(f'Training\t->\tLoss: {np.mean(losses):.3f}\tAcc: {accuracy_overall.item():.3f},')
+    loss_overall = np.mean(losses)
+    print(f'Training\t->\tLoss: {loss_overall:.3f}\tAcc: {accuracy_overall.item():.3f},')
+    return loss_overall, accuracy_overall
 
 
 def validate_single_epoch(model, dataloader, loss_fn, device):
@@ -66,16 +69,22 @@ def validate_single_epoch(model, dataloader, loss_fn, device):
             losses.append(loss.item())
 
     accuracy_overall = accuracy(prediction_overall.type(torch.int64), target_overall.type(torch.int64))
-    print(f'Validation\t->\tLoss: {np.mean(losses):.3f}\tAcc: {accuracy_overall.item():.3f},')
+    loss_overall = np.mean(losses)
+    print(f'Validation\t->\tLoss: {loss_overall:.3f}\tAcc: {accuracy_overall.item():.3f},')
+
+    return loss_overall, accuracy_overall
 
 
 def train(model, train_dataloader, val_dataloader, loss_fn, optimiser, device, epochs):
+    train_data = []
+    val_data = []
     for i in range(epochs):
         print(f"Epoch {i + 1}")
-        train_single_epoch(model, train_dataloader, loss_fn, optimiser, device)
-        validate_single_epoch(model, val_dataloader, loss_fn, device)
+        train_data.append(train_single_epoch(model, train_dataloader, loss_fn, optimiser, device))
+        val_data.append(validate_single_epoch(model, val_dataloader, loss_fn, device))
         print("---------------------------")
     print("Finished training")
+    return train_data, val_data
 
 
 if __name__ == "__main__":
@@ -123,14 +132,16 @@ if __name__ == "__main__":
                                  lr=learning_rate)
 
     # train model
-    train(model=cnn,
-          train_dataloader=train_dataloader,
-          val_dataloader=val_dataloader,
-          loss_fn=loss_fn,
-          optimiser=optimiser,
-          device=device,
-          epochs=epochs)
+    training_data = train(model=cnn,
+                          train_dataloader=train_dataloader,
+                          val_dataloader=val_dataloader,
+                          loss_fn=loss_fn,
+                          optimiser=optimiser,
+                          device=device,
+                          epochs=epochs)
 
     # save model
-    torch.save(cnn.state_dict(), path_model)
     print(f"Saving model to {path_model}")
+    torch.save(cnn.state_dict(), path_model)
+    with open(path_training_data, 'wb') as f:
+        pickle.dump(f, training_data)

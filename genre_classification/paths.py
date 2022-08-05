@@ -16,4 +16,5 @@ path_annotation_original = os.path.join(project_root_path, 'data', 'interim', 'a
 
 # Model
 path_model = os.path.join(project_root_path, 'models', 'feedforwardnet.pth')
+path_training_data = os.path.join(project_root_path, 'models', 'training_data.pkl')
 ##########################################################################################################
