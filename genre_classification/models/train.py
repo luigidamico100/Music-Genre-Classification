@@ -20,7 +20,7 @@ from genre_classification.models.config import (
 
 def train_single_epoch(model, dataloader, loss_fn, optimiser, device):
     model.train()
-    accuracy = Accuracy()
+    accuracy = Accuracy().to(device)
     losses = []
     prediction_overall = torch.empty((0,)).to(device)
     target_overall = torch.empty((0,)).to(device)
@@ -50,7 +50,7 @@ def train_single_epoch(model, dataloader, loss_fn, optimiser, device):
 
 def validate_single_epoch(model, dataloader, loss_fn, device):
     model.eval()
-    accuracy = Accuracy()
+    accuracy = Accuracy().to(device)
     prediction_overall = torch.empty((0,)).to(device)
     target_overall = torch.empty((0,)).to(device)
     losses = []
