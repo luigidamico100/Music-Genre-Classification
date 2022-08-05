@@ -10,7 +10,7 @@ import seaborn as sns
 import pandas as pd
 from genre_classification.models.cnn import CNNNetwork
 from genre_classification.models.dataset import create_data_loader, GTZANDataset
-from genre_classification.paths import path_annotation_original, path_model, path_df_training_data
+from genre_classification.paths import path_annotation_original, path_experiment
 from genre_classification.models.config import (
     device,
     batch_size,
@@ -99,19 +99,31 @@ def train(model, train_dataloader, val_dataloader, loss_fn, optimiser, device, e
     return df_training_data
 
 
-def plot_training_data(df_training_data, path_df_training_data=None):
-    fix, axs = plt.subplots(2, 1)
+def save_training_data(df_training_data, path_experiment=None, model=None):
+    import os
+
+    fig, axs = plt.subplots(2, 1)
     sns.lineplot(data=df_training_data, x=df_training_data.index, y='train_loss', label='train_loss', ax=axs[0])
     sns.lineplot(data=df_training_data, x=df_training_data.index, y='val_loss', label='val_loss', ax=axs[0])
     axs[0].set_ylabel('Loss')
     sns.lineplot(data=df_training_data, x=df_training_data.index, y='train_acc', label='train_acc', ax=axs[1])
     sns.lineplot(data=df_training_data, x=df_training_data.index, y='val_acc', label='val_acc', ax=axs[1])
     axs[1].set_ylabel('Accuracy')
-    plt.plot()
 
-    if path_df_training_data:
-        print(f'Saving df_training_data to {path_df_training_data}')
+    if path_experiment:
+        try:
+            os.mkdir(path_experiment)
+        except FileExistsError:
+            pass
+
+        print(f'Saving results to: {path_experiment}')
+        path_df_training_data = os.path.join(path_experiment, 'df_training_data.csv')
+        path_training_plot = os.path.join(path_experiment, 'training_plot.jpg')
+        path_model = os.path.join(path_experiment, 'model.pth')
+
         df_training_data.to_csv(path_df_training_data)
+        fig.savefig(path_training_plot)
+        torch.save(model.state_dict(), path_model)
 
 
 if __name__ == "__main__":
@@ -167,8 +179,5 @@ if __name__ == "__main__":
                           device=device,
                           epochs=epochs)
 
-    plot_training_data(df_training_data, path_df_training_data=path_df_training_data)
+    save_training_data(df_training_data, path_experiment=path_experiment, model=cnn)
 
-    # save model
-    print(f"Saving model to {path_model}")
-    torch.save(cnn.state_dict(), path_model)

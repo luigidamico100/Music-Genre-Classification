@@ -14,7 +14,7 @@ path_raw_features_30_sec = os.path.join(project_root_path, 'data', 'raw', 'featu
 # Annotation dataframe
 path_annotation_original = os.path.join(project_root_path, 'data', 'interim', 'annotation.csv')
 
-# Model
-path_model = os.path.join(project_root_path, 'models', 'feedforwardnet.pth')
-path_df_training_data = os.path.join(project_root_path, 'models', 'df_training_data.csv')
+# Experiment
+experiment_name = '_trial'
+path_experiment = os.path.join(project_root_path, 'models', f'experiment{experiment_name}')
 ##########################################################################################################
