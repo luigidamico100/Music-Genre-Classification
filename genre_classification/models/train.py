@@ -140,7 +140,7 @@ if __name__ == "__main__":
     experiment_name = args.experiment_name
     path_training_experiment = os.path.join(path_training_experiments, experiment_name)
     print(f'{train_debug_mode=}, {epochs=}, {experiment_name=}, {learning_rate=}')
-    exit()
+
     # instantiating our dataset object and create data loader
     mel_spectrogram = torchaudio.transforms.MelSpectrogram(
         sample_rate=sample_rate,
