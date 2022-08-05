@@ -44,6 +44,7 @@ def train_single_epoch(model, dataloader, loss_fn, optimiser, device):
     accuracy_overall = accuracy(prediction_overall.type(torch.int64), target_overall.type(torch.int64))
     print(f'Training\t->\tLoss: {np.mean(losses):.3f}\tAcc: {accuracy_overall.item():.3f},')
 
+
 def validate_single_epoch(model, dataloader, loss_fn, device):
     model.eval()
     accuracy = Accuracy()
@@ -66,6 +67,7 @@ def validate_single_epoch(model, dataloader, loss_fn, device):
 
     accuracy_overall = accuracy(prediction_overall.type(torch.int64), target_overall.type(torch.int64))
     print(f'Validation\t->\tLoss: {np.mean(losses):.3f}\tAcc: {accuracy_overall.item():.3f},')
+
 
 def train(model, train_dataloader, val_dataloader, loss_fn, optimiser, device, epochs):
     for i in range(epochs):
@@ -92,7 +94,23 @@ if __name__ == "__main__":
                        num_samples=num_samples,
                        device=device)
 
-    train_dataloader = create_data_loader(usd, batch_size)
+    train_dataloader, train_dataset = create_data_loader(path_annotation_original,
+                                                         n_samples=None,
+                                                         transformation=mel_spectrogram,
+                                                         target_sample_rate=sample_rate,
+                                                         num_samples=num_samples,
+                                                         device=device,
+                                                         batch_size=batch_size,
+                                                         usage='train')
+
+    val_dataloader, val_dataset = create_data_loader(path_annotation_original,
+                                                     n_samples=None,
+                                                     transformation=mel_spectrogram,
+                                                     target_sample_rate=sample_rate,
+                                                     num_samples=num_samples,
+                                                     device=device,
+                                                     batch_size=batch_size,
+                                                     usage='train')
 
     # construct model and assign it to device
     cnn = CNNNetwork().to(device)
@@ -107,7 +125,7 @@ if __name__ == "__main__":
     # train model
     train(model=cnn,
           train_dataloader=train_dataloader,
-          val_dataloader=train_dataloader,
+          val_dataloader=val_dataloader,
           loss_fn=loss_fn,
           optimiser=optimiser,
           device=device,
