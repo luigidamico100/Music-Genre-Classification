@@ -1,3 +1,4 @@
+import copy
 import torch
 import torchaudio
 from torch import nn
@@ -85,25 +86,29 @@ def train(model, train_dataloader, val_dataloader, loss_fn, optimiser, device, e
     train_data = []
     val_data = []
     start_time = time.time()
+    best_val_loss = np.inf
     for i in range(epochs):
         print(f"Epoch {i + 1}")
         train_data.append(train_single_epoch(model, train_dataloader, loss_fn, optimiser, device))
         val_data.append(validate_single_epoch(model, val_dataloader, loss_fn, device))
+        if val_data[0] < best_val_loss:
+            best_model = copy.deepcopy(model)
+            print('Best model found')
         print("---------------------------")
     end_time = time.time()
-    print(f"Finished training. Elapsed time: {(end_time-start_time)/60.:.2f} mins")
+    print(f"Finished training. Elapsed time: {(end_time - start_time) / 60.:.2f} mins")
 
     train_data = np.array(train_data)
     val_data = np.array(val_data)
     training_data = np.concatenate((train_data, val_data), axis=1)
     df_training_data = pd.DataFrame(training_data, columns=['train_loss', 'train_acc', 'val_loss', 'val_acc'])
-    df_training_data.index = df_training_data.index+1
+    df_training_data.index = df_training_data.index + 1
     df_training_data.index.name = 'epoch'
 
-    return df_training_data
+    return df_training_data, best_model
 
 
-def save_training_data(df_training_data, path_experiment=None, model=None):
+def save_training_data(df_training_data, path_experiment=None, best_model=None):
     import os
 
     fig, axs = plt.subplots(2, 1)
@@ -127,13 +132,13 @@ def save_training_data(df_training_data, path_experiment=None, model=None):
 
         df_training_data.to_csv(path_df_training_data)
         fig.savefig(path_training_plot)
-        torch.save(model.state_dict(), path_model)
+        torch.save(best_model.state_dict(), path_model)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Training process')
     parser.add_argument('--epochs', type=int, help='epochs number', default=epochs)
-    #parser.add_argument('--train_debug_mode', type=bool, help='Train debug mode', default=train_debug_mode, action=argparse.BooleanOptionalAction)
+    # parser.add_argument('--train_debug_mode', type=bool, help='Train debug mode', default=train_debug_mode, action=argparse.BooleanOptionalAction)
     parser.add_argument('--train_debug_mode', type=str, help='Train debug mode', default=train_debug_mode)
     parser.add_argument('--learning_rate', type=float, help='training learning rate', default=learning_rate)
     parser.add_argument('--experiment_name', type=str, help='experiment name', default=experiment_name)
@@ -143,8 +148,8 @@ if __name__ == "__main__":
     learning_rate = args.learning_rate
     experiment_name = args.experiment_name
     path_training_experiment = os.path.join(path_training_experiments, experiment_name)
-    #print(f'{train_debug_mode=}, {epochs=}, {experiment_name=}, {learning_rate=}')
-    #exit()
+    # print(f'{train_debug_mode=}, {epochs=}, {experiment_name=}, {learning_rate=}')
+    # exit()
 
     # instantiating our dataset object and create data loader
     mel_spectrogram = torchaudio.transforms.MelSpectrogram(
@@ -190,13 +195,12 @@ if __name__ == "__main__":
                                  lr=learning_rate)
 
     # train model
-    df_training_data = train(model=cnn,
-                          train_dataloader=train_dataloader,
-                          val_dataloader=val_dataloader,
-                          loss_fn=loss_fn,
-                          optimiser=optimiser,
-                          device=device,
-                          epochs=epochs)
+    df_training_data, best_model = train(model=cnn,
+                                         train_dataloader=train_dataloader,
+                                         val_dataloader=val_dataloader,
+                                         loss_fn=loss_fn,
+                                         optimiser=optimiser,
+                                         device=device,
+                                         epochs=epochs)
 
     save_training_data(df_training_data, path_experiment=path_training_experiment, model=cnn)
-
