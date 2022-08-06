@@ -91,7 +91,7 @@ def train(model, train_dataloader, val_dataloader, loss_fn, optimiser, device, e
         print(f"Epoch {i + 1}")
         train_data.append(train_single_epoch(model, train_dataloader, loss_fn, optimiser, device))
         val_data.append(validate_single_epoch(model, val_dataloader, loss_fn, device))
-        if val_data[0] < best_val_loss:
+        if val_data[-1][0] < best_val_loss:
             best_model = copy.deepcopy(model)
             print('Best model found')
         print("---------------------------")
@@ -108,14 +108,16 @@ def train(model, train_dataloader, val_dataloader, loss_fn, optimiser, device, e
     return df_training_data, best_model
 
 
-def save_training_data(df_training_data, path_experiment=None, best_model=None):
-    fig, axs = plt.subplots(2, 1)
-    sns.lineplot(data=df_training_data, x=df_training_data.index, y='train_loss', label='train_loss', ax=axs[0])
-    sns.lineplot(data=df_training_data, x=df_training_data.index, y='val_loss', label='val_loss', ax=axs[0])
-    axs[0].set_ylabel('Loss')
-    sns.lineplot(data=df_training_data, x=df_training_data.index, y='train_acc', label='train_acc', ax=axs[1])
-    sns.lineplot(data=df_training_data, x=df_training_data.index, y='val_acc', label='val_acc', ax=axs[1])
-    axs[1].set_ylabel('Accuracy')
+def save_training_data(df_training_data, path_experiment=None, model=None):
+    with sns.axes_style("darkgrid"):
+        fig, axs = plt.subplots(2, 1)
+        sns.lineplot(data=df_training_data, x=df_training_data.index, y='train_loss', label='train_loss', ax=axs[0])
+        sns.lineplot(data=df_training_data, x=df_training_data.index, y='val_loss', label='val_loss', ax=axs[0])
+        axs[0].set_ylabel('Loss')
+        sns.lineplot(data=df_training_data, x=df_training_data.index, y='train_acc', label='train_acc', ax=axs[1])
+        sns.lineplot(data=df_training_data, x=df_training_data.index, y='val_acc', label='val_acc', ax=axs[1])
+        axs[1].set_ylabel('Accuracy')
+        plt.tight_layout()
 
     if path_experiment:
         try:
@@ -130,7 +132,7 @@ def save_training_data(df_training_data, path_experiment=None, best_model=None):
 
         df_training_data.to_csv(path_df_training_data)
         fig.savefig(path_training_plot)
-        torch.save(best_model.state_dict(), path_model)
+        torch.save(model.state_dict(), path_model)
 
 
 def main(epochs, train_debug_mode, learning_rate, experiment_name):
@@ -146,7 +148,7 @@ def main(epochs, train_debug_mode, learning_rate, experiment_name):
     learning_rate = args.learning_rate
     experiment_name = args.experiment_name
     path_training_experiment = os.path.join(path_training_experiments, experiment_name)
-    # print(f'{train_debug_mode=}, {epochs=}, {experiment_name=}, {learning_rate=}')
+    print(f'{train_debug_mode=}, {epochs=}, {experiment_name=}, {learning_rate=}')
     # exit()
 
     # instantiating our dataset object and create data loader
@@ -194,7 +196,7 @@ def main(epochs, train_debug_mode, learning_rate, experiment_name):
                                          device=device,
                                          epochs=epochs)
 
-    save_training_data(df_training_data, path_experiment=path_training_experiment, model=cnn)
+    save_training_data(df_training_data, path_experiment=path_training_experiment, model=best_model)
 
 
 if __name__ == "__main__":
