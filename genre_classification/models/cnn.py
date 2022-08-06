@@ -22,7 +22,8 @@ class CNNNetwork(nn.Module):
             ),
             nn.BatchNorm2d(16),
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2)
+            nn.MaxPool2d(kernel_size=2),
+            nn.Dropout(.2),
         )
         self.conv2 = nn.Sequential(
             nn.Conv2d(
@@ -34,7 +35,8 @@ class CNNNetwork(nn.Module):
             ),
             nn.BatchNorm2d(32),
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2)
+            nn.MaxPool2d(kernel_size=2),
+            nn.Dropout(.2),
         )
         self.conv3 = nn.Sequential(
             nn.Conv2d(
@@ -46,7 +48,8 @@ class CNNNetwork(nn.Module):
             ),
             nn.BatchNorm2d(64),
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2)
+            nn.MaxPool2d(kernel_size=2),
+            nn.Dropout(.2),
         )
         self.conv4 = nn.Sequential(
             nn.Conv2d(
@@ -58,7 +61,8 @@ class CNNNetwork(nn.Module):
             ),
             nn.BatchNorm2d(128),
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2)
+            nn.MaxPool2d(kernel_size=2),
+            nn.Dropout(.2),
         )
         self.conv5 = nn.Sequential(
             nn.Conv2d(
