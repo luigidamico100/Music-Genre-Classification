@@ -109,8 +109,6 @@ def train(model, train_dataloader, val_dataloader, loss_fn, optimiser, device, e
 
 
 def save_training_data(df_training_data, path_experiment=None, best_model=None):
-    import os
-
     fig, axs = plt.subplots(2, 1)
     sns.lineplot(data=df_training_data, x=df_training_data.index, y='train_loss', label='train_loss', ax=axs[0])
     sns.lineplot(data=df_training_data, x=df_training_data.index, y='val_loss', label='val_loss', ax=axs[0])
@@ -135,7 +133,7 @@ def save_training_data(df_training_data, path_experiment=None, best_model=None):
         torch.save(best_model.state_dict(), path_model)
 
 
-if __name__ == "__main__":
+def main(epochs, train_debug_mode, learning_rate, experiment_name):
     parser = argparse.ArgumentParser(description='Training process')
     parser.add_argument('--epochs', type=int, help='epochs number', default=epochs)
     # parser.add_argument('--train_debug_mode', type=bool, help='Train debug mode', default=train_debug_mode, action=argparse.BooleanOptionalAction)
@@ -158,13 +156,6 @@ if __name__ == "__main__":
         hop_length=512,
         n_mels=64
     )
-
-    usd = GTZANDataset(path_annotation_original,
-                       n_samples=None,
-                       transformation=mel_spectrogram,
-                       target_sample_rate=sample_rate,
-                       num_samples=num_samples,
-                       device=device)
 
     train_dataloader, train_dataset = create_data_loader(path_annotation_original,
                                                          n_samples=10 if train_debug_mode else None,
@@ -204,3 +195,7 @@ if __name__ == "__main__":
                                          epochs=epochs)
 
     save_training_data(df_training_data, path_experiment=path_training_experiment, model=cnn)
+
+
+if __name__ == "__main__":
+    main(epochs, train_debug_mode, learning_rate, experiment_name)
