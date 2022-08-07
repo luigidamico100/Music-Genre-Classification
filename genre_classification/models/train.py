@@ -20,7 +20,7 @@ from genre_classification.models.config import (
     epochs,
     learning_rate,
     sample_rate,
-    chucks_len_sec,
+    chunks_len_sec,
     train_debug_mode,
 )
 
@@ -94,6 +94,7 @@ def train(model, train_dataloader, val_dataloader, loss_fn, optimiser, device, e
         val_data.append(validate_single_epoch(model, val_dataloader, loss_fn, device))
         if val_data[-1][0] < best_val_loss:
             best_model = copy.deepcopy(model)
+            best_val_loss = val_data[-1][0]
             print('Best model found')
         print("---------------------------")
     end_time = time.time()
@@ -164,7 +165,7 @@ def main(epochs, train_debug_mode, learning_rate, experiment_name):
                                                          n_samples=10 if train_debug_mode else None,
                                                          transformation=mel_spectrogram,
                                                          target_sample_rate=sample_rate,
-                                                         chucks_len_sec=chucks_len_sec,
+                                                         chunks_len_sec=chunks_len_sec,
                                                          device=device,
                                                          batch_size=batch_size,
                                                          split='train')
@@ -173,7 +174,7 @@ def main(epochs, train_debug_mode, learning_rate, experiment_name):
                                                      n_samples=10 if train_debug_mode else None,
                                                      transformation=mel_spectrogram,
                                                      target_sample_rate=sample_rate,
-                                                     chucks_len_sec=chucks_len_sec,
+                                                     chunks_len_sec=chunks_len_sec,
                                                      device=device,
                                                      batch_size=batch_size,
                                                      split='val')
@@ -181,7 +182,7 @@ def main(epochs, train_debug_mode, learning_rate, experiment_name):
     # construct model and assign it to device
     cnn = CNNNetwork().to(device)
     print(cnn)
-    summary(cnn, (1, 1, 400, 400))
+    summary(cnn, (1, 400, 400))
 
     # initialise loss function + optimiser
     loss_fn = nn.CrossEntropyLoss()

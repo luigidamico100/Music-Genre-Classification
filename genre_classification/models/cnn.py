@@ -207,7 +207,7 @@ class CNNNetwork_original(nn.Module):
 if __name__ == "__main__":
     from genre_classification.models.config import device
     cnn = CNNNetwork(print_forward_tensors_shape=True).to(device)
-    summary(cnn, (1, 1, 64, 44))
+    summary(cnn, (1, 64, 44))
 
     import torch
     input_tensor = torch.rand(1, 1, 20, 20)

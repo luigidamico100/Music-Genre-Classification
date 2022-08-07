@@ -16,7 +16,8 @@ class GTZANDataset(Dataset):
                  device=None,
                  folds=[0, 1, 2, 3, 4, 5],
                  split='train',
-                 chunks_len_sec=7.):
+                 chunks_len_sec=7.,
+                 verbose_sample_wasting=False):
 
         self.annotations = pd.read_csv(annotations_file_path, index_col=0)
         self.annotations = self.annotations[self.annotations['fold'].isin(folds)]
@@ -30,6 +31,7 @@ class GTZANDataset(Dataset):
         self.transformation = transformation.to(device)
         self.genre_to_class = {genre: idx for idx, genre in enumerate(self.annotations['genre'].unique())}
         self.class_to_genre = {self.genre_to_class[genre]: genre for genre in self.genre_to_class}
+        self.verbose_sample_wasting = verbose_sample_wasting
 
     def __len__(self):
         return len(self.annotations)
@@ -70,7 +72,8 @@ class GTZANDataset(Dataset):
             signal = signal[:num_chunks*self.num_samples]
             len_post = len(signal)
             signal = torch.reshape(signal, (num_chunks, self.num_samples))
-            print(f'Losed {len_pre - len_post} samples ({((len_pre-len_post)/self.target_sample_rate):.1f}) sec')
+            if self.verbose_sample_wasting:
+                print(f'Losed {len_pre - len_post} samples ({((len_pre-len_post)/self.target_sample_rate):.1f}) sec')
         return signal
         
     
