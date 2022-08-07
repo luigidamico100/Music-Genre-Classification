@@ -138,20 +138,22 @@ def save_training_data(df_training_data, path_experiment=None, model=None):
 
 #%%
 
-def main(epochs, train_debug_mode, learning_rate, experiment_name):
+def main(epochs, train_debug_mode, learning_rate, experiment_name, chunks_len_sec):
     parser = argparse.ArgumentParser(description='Training process')
     parser.add_argument('--epochs', type=int, help='epochs number', default=epochs)
     # parser.add_argument('--train_debug_mode', type=bool, help='Train debug mode', default=train_debug_mode, action=argparse.BooleanOptionalAction)
     parser.add_argument('--train_debug_mode', type=str, help='Train debug mode', default=train_debug_mode)
     parser.add_argument('--learning_rate', type=float, help='training learning rate', default=learning_rate)
     parser.add_argument('--experiment_name', type=str, help='experiment name', default=experiment_name)
+    parser.add_argument('--chunks_len_sec', type=int, help='Chunks length (sec)', default=chunks_len_sec)
     args = parser.parse_args()
     epochs = args.epochs
     train_debug_mode = args.train_debug_mode == 'True'
     learning_rate = args.learning_rate
     experiment_name = args.experiment_name
+    chunks_len_sec = args.chunks_len_sec
     path_training_experiment = os.path.join(path_training_experiments, experiment_name)
-    print(f'train_debug_mode={train_debug_mode}, epochs={epochs},  experiment_name={experiment_name}, learning_rate={learning_rate}')
+    print(f'train_debug_mode={train_debug_mode}, epochs={epochs},  experiment_name={experiment_name}, learning_rate={learning_rate}, chunks_len_sec={chunks_len_sec}')
 
     # instantiating our dataset object and create data loader
     mel_spectrogram = torchaudio.transforms.MelSpectrogram(
@@ -202,4 +204,4 @@ def main(epochs, train_debug_mode, learning_rate, experiment_name):
 
 
 if __name__ == "__main__":
-    main(epochs, train_debug_mode, learning_rate, experiment_name)
+    main(epochs, train_debug_mode, learning_rate, experiment_name, chunks_len_sec)
