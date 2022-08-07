@@ -80,7 +80,14 @@ class CNNNetwork(nn.Module):
         self.softmax = nn.Softmax(dim=1)
 
     def forward(self, input_data):
+        '''
+        input_data = torch tensor of shape (b, f, t)
+
+        '''
         x = input_data
+        if self.print_forward_tensors_shape:
+            print(x.shape)
+        x = x.unsqueeze(1) # (b, f, t) -> (b, c=1, f, t)
         if self.print_forward_tensors_shape:
             print(x.shape)
         x = self.batch_normalization(x)
@@ -105,7 +112,7 @@ class CNNNetwork(nn.Module):
         x = F.max_pool2d(x, kernel_size=x.shape[2:])
         if self.print_forward_tensors_shape:
             print(x.shape)
-        x = self.flatten(x)
+        x = self.flatten(x)     # (b, c=128, f=1, t=1) -> (b, c)
         if self.print_forward_tensors_shape:
             print(x.shape)
         logits = self.linear(x)

@@ -20,7 +20,7 @@ from genre_classification.models.config import (
     epochs,
     learning_rate,
     sample_rate,
-    num_samples,
+    chucks_len_sec,
     train_debug_mode,
 )
 
@@ -64,9 +64,10 @@ def validate_single_epoch(model, dataloader, loss_fn, device):
     with torch.no_grad():
         for input, target in dataloader:
             input, target = input.to(device), target.to(device)
-
-            # calculate loss
+            b, c, f, t = input.shape  # batchs, chunks, freq., time
+            input = input.view(-1, f, t)    # (b, c, f, t) -> (b*c, f, t)
             prediction = model(input)
+            prediction = prediction.view(b, c, -1).mean(dim=1) # Check that
             loss = loss_fn(prediction, target)
 
             _, predicted = torch.max(prediction.data, dim=1)
@@ -134,6 +135,7 @@ def save_training_data(df_training_data, path_experiment=None, model=None):
         fig.savefig(path_training_plot)
         torch.save(model.state_dict(), path_model)
 
+#%%
 
 def main(epochs, train_debug_mode, learning_rate, experiment_name):
     parser = argparse.ArgumentParser(description='Training process')
@@ -162,19 +164,19 @@ def main(epochs, train_debug_mode, learning_rate, experiment_name):
                                                          n_samples=10 if train_debug_mode else None,
                                                          transformation=mel_spectrogram,
                                                          target_sample_rate=sample_rate,
-                                                         num_samples=num_samples,
+                                                         chucks_len_sec=chucks_len_sec,
                                                          device=device,
                                                          batch_size=batch_size,
-                                                         usage='train')
+                                                         split='train')
 
     val_dataloader, val_dataset = create_data_loader(path_annotation_original,
                                                      n_samples=10 if train_debug_mode else None,
                                                      transformation=mel_spectrogram,
                                                      target_sample_rate=sample_rate,
-                                                     num_samples=num_samples,
+                                                     chucks_len_sec=chucks_len_sec,
                                                      device=device,
                                                      batch_size=batch_size,
-                                                     usage='val')
+                                                     split='val')
 
     # construct model and assign it to device
     cnn = CNNNetwork().to(device)
