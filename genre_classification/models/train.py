@@ -145,7 +145,7 @@ def main(epochs, train_debug_mode, learning_rate, experiment_name, chunks_len_se
     parser.add_argument('--train_debug_mode', type=str, help='Train debug mode', default=train_debug_mode)
     parser.add_argument('--learning_rate', type=float, help='training learning rate', default=learning_rate)
     parser.add_argument('--experiment_name', type=str, help='experiment name', default=experiment_name)
-    parser.add_argument('--chunks_len_sec', type=int, help='Chunks length (sec)', default=chunks_len_sec)
+    parser.add_argument('--chunks_len_sec', type=float, help='Chunks length (sec)', default=chunks_len_sec)
     args = parser.parse_args()
     epochs = args.epochs
     train_debug_mode = args.train_debug_mode == 'True'
