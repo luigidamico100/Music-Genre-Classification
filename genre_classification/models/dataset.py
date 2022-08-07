@@ -28,10 +28,19 @@ class GTZANDataset(Dataset):
         self.device = device
         self.target_sample_rate = target_sample_rate
         self.num_samples = int(self.target_sample_rate * chunks_len_sec)
-        self.transformation = transformation.to(device)
+        #self.transformation = transformation.to(device)
         self.genre_to_class = {genre: idx for idx, genre in enumerate(self.annotations['genre'].unique())}
         self.class_to_genre = {self.genre_to_class[genre]: genre for genre in self.genre_to_class}
         self.verbose_sample_wasting = verbose_sample_wasting
+        
+        self.mel_spectrogram = torchaudio.transforms.MelSpectrogram(
+            sample_rate=target_sample_rate,
+            n_fft=1024,
+            hop_length=512,
+            n_mels=64,
+            normalized=False
+        ).to(device)
+        self.amplitude_to_db = torchaudio.transforms.AmplitudeToDB().to(device)
 
     def __len__(self):
         return len(self.annotations)
@@ -59,7 +68,8 @@ class GTZANDataset(Dataset):
         signal = self.adjust_audio_len(signal)
         # signal = self.cut(signal)
         # signal = self.right_pad(signal)
-        signal = self.transformation(signal)
+        signal = self.mel_spectrogram(signal)
+        signal = self.amplitude_to_db(signal)
         return signal, label
 
     def adjust_audio_len(self, signal):
@@ -155,17 +165,12 @@ if __name__ == "__main__":
         chunks_len_sec,
     )
 
-    mel_spectrogram = torchaudio.transforms.MelSpectrogram(
-        sample_rate=sample_rate,
-        n_fft=1024,
-        hop_length=512,
-        n_mels=64,
-        normalized=False
-    )
+
+    chunks_len_sec = 14.
 
     dataloader, dataset = create_data_loader(path_annotation_original,
                                              n_samples=None,
-                                             transformation=mel_spectrogram,
+                                             transformation=None,
                                              target_sample_rate=sample_rate,
                                              chunks_len_sec=chunks_len_sec,
                                              device=device,

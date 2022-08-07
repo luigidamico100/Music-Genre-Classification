@@ -155,17 +155,9 @@ def main(epochs, train_debug_mode, learning_rate, experiment_name, chunks_len_se
     path_training_experiment = os.path.join(path_training_experiments, experiment_name)
     print(f'train_debug_mode={train_debug_mode}, epochs={epochs},  experiment_name={experiment_name}, learning_rate={learning_rate}, chunks_len_sec={chunks_len_sec}')
 
-    # instantiating our dataset object and create data loader
-    mel_spectrogram = torchaudio.transforms.MelSpectrogram(
-        sample_rate=sample_rate,
-        n_fft=1024,
-        hop_length=512,
-        n_mels=64
-    )
-
     train_dataloader, train_dataset = create_data_loader(path_annotation_original,
                                                          n_samples=10 if train_debug_mode else None,
-                                                         transformation=mel_spectrogram,
+                                                         transformation=None,
                                                          target_sample_rate=sample_rate,
                                                          chunks_len_sec=chunks_len_sec,
                                                          device=device,
@@ -174,7 +166,7 @@ def main(epochs, train_debug_mode, learning_rate, experiment_name, chunks_len_se
 
     val_dataloader, val_dataset = create_data_loader(path_annotation_original,
                                                      n_samples=10 if train_debug_mode else None,
-                                                     transformation=mel_spectrogram,
+                                                     transformation=None,
                                                      target_sample_rate=sample_rate,
                                                      chunks_len_sec=chunks_len_sec,
                                                      device=device,
