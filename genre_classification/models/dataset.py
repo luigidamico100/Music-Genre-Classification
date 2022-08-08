@@ -107,7 +107,7 @@ class GTZANDataset(Dataset):
             RandomApply([PitchShift(n_samples=self.num_samples, sample_rate=22050)], p=0.4),
             RandomApply([Reverb(sample_rate=22050)], p=0.3),
         ]
-        self.augmentation = Compose(transforms=transforms)
+        self.augmentation = Compose(transforms=transforms).to(device)
 
 
     def get_signal_chunks(self, signal):
