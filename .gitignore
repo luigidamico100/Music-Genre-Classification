@@ -116,3 +116,8 @@ tox.ini
 !/data/interim/.gitkeep
 
 /models/*
+!/models
+!/models/.gitkeep
+!/models/experiments
+/models/experiments/*
+!/models/experiments/.gitkeep
