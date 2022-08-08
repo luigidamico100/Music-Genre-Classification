@@ -100,7 +100,7 @@ class GTZANDataset(Dataset):
 
     def _get_augmentations(self):
         transforms = [
-            RandomResizedCrop(n_samples=self.num_samples),
+            RandomResizedCrop(n_samples=self.num_samples).to(self.device),
             RandomApply([PolarityInversion()], p=0.8).to(self.device),
             RandomApply([Noise(min_snr=0.3, max_snr=0.5)], p=0.3).to(self.device),
             RandomApply([Gain()], p=0.2).to(self.device),
