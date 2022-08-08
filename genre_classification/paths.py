@@ -23,7 +23,7 @@ def get_path_experiment(experiment_name, file_type=None):
     if not file_type:
         return os.path.join(path_training_experiments, experiment_name)
     
-    assert file_type in ['df_training_data', 'training_plot', 'best_model']
+    assert file_type in ['df_training_data', 'training_plot', 'best_model', 'logger']
     
     if file_type=='df_training_data':
         file_name = 'df_training_data.csv'
@@ -31,6 +31,8 @@ def get_path_experiment(experiment_name, file_type=None):
         file_name = 'training_plot.jpg'
     elif file_type=='best_model':
         file_name = 'best_model.pth'
+    elif file_type=='logger':
+        file_name = 'training_log.log'
     
     return os.path.join(path_training_experiments, experiment_name, file_name)
 ##########################################################################################################

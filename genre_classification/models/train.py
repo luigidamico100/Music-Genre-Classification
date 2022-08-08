@@ -22,7 +22,10 @@ from genre_classification.models.config import (
     sample_rate,
     chunks_len_sec,
     train_debug_mode,
+    set_logger
 )
+import logging
+import sys
 
 
 def train_single_epoch(model, dataloader, loss_fn, optimiser, device):
@@ -122,12 +125,6 @@ def save_training_data(df_training_data, experiment_name=None, model=None):
         plt.tight_layout()
 
     if experiment_name:
-        path_experiment = get_path_experiment(experiment_name)
-    
-        try:
-            os.mkdir(path_experiment)
-        except FileExistsError:
-            pass
 
         path_df_training_data = get_path_experiment(experiment_name, file_type='df_training_data')
         path_training_plot = get_path_experiment(experiment_name, file_type='training_plot')
@@ -141,9 +138,7 @@ def save_training_data(df_training_data, experiment_name=None, model=None):
         torch.save(model.state_dict(), path_best_model)
     
 
-#%%
-
-def main(epochs, train_debug_mode, learning_rate, experiment_name, chunks_len_sec):
+def get_params(train_debug_mode, experiment_name, epochs, learning_rate, chunks_len_sec):
     parser = argparse.ArgumentParser(description='Training process')
     parser.add_argument('--epochs', type=int, help='epochs number', default=epochs)
     # parser.add_argument('--train_debug_mode', type=bool, help='Train debug mode', default=train_debug_mode, action=argparse.BooleanOptionalAction)
@@ -158,15 +153,41 @@ def main(epochs, train_debug_mode, learning_rate, experiment_name, chunks_len_se
     experiment_name = args.experiment_name
     chunks_len_sec = args.chunks_len_sec
     
-    print(f'train_debug_mode={train_debug_mode}, epochs={epochs},  experiment_name={experiment_name}, learning_rate={learning_rate}, chunks_len_sec={chunks_len_sec}')
+    return train_debug_mode, experiment_name, epochs, learning_rate, chunks_len_sec
 
 
-
+def print_params(train_debug_mode, experiment_name, epochs, learning_rate, chunks_len_sec):
     
+    logging.info(f'train_debug_mode={train_debug_mode}')
+    logging.info(f'experiment_name={experiment_name}')
+    logging.info('')
+    logging.info(f'epochs={epochs}')
+    logging.info(f'learning_rate={learning_rate}')
+    logging.info(f'chunks_len_sec={chunks_len_sec}')
+    logging.info('')
+    
+    
+#%%
+
+def main(train_debug_mode, experiment_name, epochs, learning_rate, chunks_len_sec):
+    
+    params = get_params(train_debug_mode, experiment_name, epochs, learning_rate, chunks_len_sec)
+    train_debug_mode, experiment_name, epochs, learning_rate, chunks_len_sec = params
+    
+    path_experiment = get_path_experiment(experiment_name)
+    try:
+        os.mkdir(path_experiment)
+    except FileExistsError:
+        pass
+    
+    path_logger = get_path_experiment(experiment_name, file_type='logger')
+        
+    set_logger(path_logger)
+        
+    print_params(train_debug_mode, experiment_name, epochs, learning_rate, chunks_len_sec)
 
     train_dataloader, train_dataset = create_data_loader(path_annotation_original,
-                                                         n_samples=10 if train_debug_mode else None,
-                                                         transformation=None,
+                                                         n_examples=10 if train_debug_mode else None,
                                                          target_sample_rate=sample_rate,
                                                          chunks_len_sec=chunks_len_sec,
                                                          device=device,
@@ -174,8 +195,7 @@ def main(epochs, train_debug_mode, learning_rate, experiment_name, chunks_len_se
                                                          split='train')
 
     val_dataloader, val_dataset = create_data_loader(path_annotation_original,
-                                                     n_samples=10 if train_debug_mode else None,
-                                                     transformation=None,
+                                                     n_examples=10 if train_debug_mode else None,
                                                      target_sample_rate=sample_rate,
                                                      chunks_len_sec=chunks_len_sec,
                                                      device=device,
@@ -184,7 +204,7 @@ def main(epochs, train_debug_mode, learning_rate, experiment_name, chunks_len_se
 
     # construct model and assign it to device
     cnn = CNNNetwork().to(device)
-    print(cnn)
+    logging.info(cnn.__str__())
     summary(cnn, (1, 400, 400))
 
     # initialise loss function + optimiser
@@ -205,4 +225,4 @@ def main(epochs, train_debug_mode, learning_rate, experiment_name, chunks_len_se
 
 
 if __name__ == "__main__":
-    main(epochs, train_debug_mode, learning_rate, experiment_name, chunks_len_sec)
+    main(train_debug_mode, experiment_name, epochs, learning_rate, chunks_len_sec)
