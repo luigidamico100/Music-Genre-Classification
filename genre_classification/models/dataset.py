@@ -87,9 +87,9 @@ class GTZANDataset(Dataset):
         # signal = self.right_pad(signal)
         if self.training:
             signal = signal.unsqueeze(0)
-            signal = signal.to('cpu')
+            #signal = signal.to('cpu')
             signal = self.augmentation(signal)
-            signal = signal.to(self.device)
+            #signal = signal.to(self.device)
             signal = signal.squeeze(0)
         else:
             signal = self.get_signal_chunks(signal)
@@ -101,15 +101,15 @@ class GTZANDataset(Dataset):
     def _get_augmentations(self):
         transforms = [
             RandomResizedCrop(n_samples=self.num_samples),
-            RandomApply([PolarityInversion()], p=0.8),
-            RandomApply([Noise(min_snr=0.3, max_snr=0.5)], p=0.3),
-            RandomApply([Gain()], p=0.2),
-            RandomApply([HighLowPass(sample_rate=22050)], p=0.8),
-            RandomApply([Delay(sample_rate=22050)], p=0.5),
-            RandomApply([PitchShift(n_samples=self.num_samples, sample_rate=22050)], p=0.4),
-            RandomApply([Reverb(sample_rate=22050)], p=0.3),
+            RandomApply([PolarityInversion()], p=0.8).to(self.device),
+            RandomApply([Noise(min_snr=0.3, max_snr=0.5)], p=0.3).to(self.device),
+            RandomApply([Gain()], p=0.2).to(self.device),
+            RandomApply([HighLowPass(sample_rate=22050)], p=0.8).to(self.device),
+            RandomApply([Delay(sample_rate=22050)], p=0.5).to(self.device),
+            RandomApply([PitchShift(n_samples=self.num_samples, sample_rate=22050)], p=0.4).to(self.device),
+            RandomApply([Reverb(sample_rate=22050)], p=0.3).to(self.device),
         ]
-        self.augmentation = Compose(transforms=transforms).to(device)
+        self.augmentation = Compose(transforms=transforms)
 
 
     def get_signal_chunks(self, signal):
