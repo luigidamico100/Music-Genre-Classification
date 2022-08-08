@@ -87,7 +87,9 @@ class GTZANDataset(Dataset):
         # signal = self.right_pad(signal)
         if self.training:
             signal = signal.unsqueeze(0)
+            signal = signal.to('cpu')
             signal = self.augmentation(signal)
+            signal = signal.to(self.device)
             signal = signal.squeeze(0)
         else:
             signal = self.get_signal_chunks(signal)
