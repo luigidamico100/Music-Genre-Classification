@@ -4,14 +4,26 @@ import torchaudio
 import torch
 import random
 import math
+from torchaudio_augmentations import (
+    RandomResizedCrop,
+    RandomApply,
+    PolarityInversion,
+    Noise,
+    Gain,
+    HighLowPass,
+    Delay,
+    PitchShift,
+    Reverb,
+    Compose,
+)
 
 
 class GTZANDataset(Dataset):
 
     def __init__(self,
                  annotations_file_path,
-                 n_samples=None,
-                 transformation=None,
+                 n_examples=None,
+                 augment=False,
                  target_sample_rate=None,
                  device=None,
                  folds=[0, 1, 2, 3, 4, 5],
@@ -21,10 +33,11 @@ class GTZANDataset(Dataset):
 
         self.annotations = pd.read_csv(annotations_file_path, index_col=0)
         self.annotations = self.annotations[self.annotations['fold'].isin(folds)]
-        if n_samples:
-            self.annotations = self.annotations.sample(n_samples, random_state=42)
+        if n_examples:
+            self.annotations = self.annotations.sample(n_examples, random_state=42)
         assert split in ['train', 'val', 'test']
         self.split = split
+        self.training = split=='train'
         self.device = device
         self.target_sample_rate = target_sample_rate
         self.num_samples = int(self.target_sample_rate * chunks_len_sec)
@@ -32,6 +45,8 @@ class GTZANDataset(Dataset):
         self.genre_to_class = {genre: idx for idx, genre in enumerate(self.annotations['genre'].unique())}
         self.class_to_genre = {self.genre_to_class[genre]: genre for genre in self.genre_to_class}
         self.verbose_sample_wasting = verbose_sample_wasting
+        if self.training:
+            self._get_augmentations()
         
         self.mel_spectrogram = torchaudio.transforms.MelSpectrogram(
             sample_rate=target_sample_rate,
@@ -48,7 +63,9 @@ class GTZANDataset(Dataset):
     def __getitem__(self, idx):
         '''
         self.split == 'train'
-            return torch.Tensor of shape (f, t) 
+            return torch.Tensor of shape (f, t).
+                f = n_fft
+                t = (self.num_samples) / hop_length
         self.split == 'val' or 'test'
             return torch.Tensor of shape (c, f, t)
         
@@ -65,13 +82,44 @@ class GTZANDataset(Dataset):
         signal = signal.to(self.device)
         signal = self.resample(signal, sr)
         signal = self.mix_down(signal)
-        signal = self.adjust_audio_len(signal)
+        #signal = self.adjust_audio_len(signal)
         # signal = self.cut(signal)
         # signal = self.right_pad(signal)
+        if self.training:
+            signal = signal.unsqueeze(0)
+            signal = self.augmentation(signal)
+            signal = signal.squeeze(0)
+        else:
+            signal = self.get_signal_chunks(signal)
         signal = self.mel_spectrogram(signal)
         signal = self.amplitude_to_db(signal)
+        
         return signal, label
 
+    def _get_augmentations(self):
+        transforms = [
+            RandomResizedCrop(n_samples=self.num_samples),
+            RandomApply([PolarityInversion()], p=0.8),
+            RandomApply([Noise(min_snr=0.3, max_snr=0.5)], p=0.3),
+            RandomApply([Gain()], p=0.2),
+            RandomApply([HighLowPass(sample_rate=22050)], p=0.8),
+            RandomApply([Delay(sample_rate=22050)], p=0.5),
+            RandomApply([PitchShift(n_samples=self.num_samples, sample_rate=22050)], p=0.4),
+            RandomApply([Reverb(sample_rate=22050)], p=0.3),
+        ]
+        self.augmentation = Compose(transforms=transforms)
+
+
+    def get_signal_chunks(self, signal):
+        num_chunks = len(signal) // self.num_samples
+        len_pre = len(signal)
+        signal = signal[:num_chunks*self.num_samples]
+        len_post = len(signal)
+        signal = torch.reshape(signal, (num_chunks, self.num_samples))
+        if self.verbose_sample_wasting:
+            print(f'Losed {len_pre - len_post} samples ({((len_pre-len_post)/self.target_sample_rate):.1f}) sec')
+        return signal
+    
     def adjust_audio_len(self, signal):
         if self.split == 'train':
             random_index = random.randint(0, len(signal) - self.num_samples - 1)
@@ -120,13 +168,14 @@ class GTZANDataset(Dataset):
 
 
 def create_data_loader(path_annotation_original,
-                       n_samples=None,
-                       transformation=None,
+                       n_examples=None,
                        target_sample_rate=None,
                        chunks_len_sec=7.,
                        device='cpu',
                        batch_size=64,
-                       split='train'):
+                       split='train',
+                       verbose_sample_wasting=False):
+    
     if split == 'train':
         folds = list(range(0, 14))
     else:
@@ -142,16 +191,19 @@ def create_data_loader(path_annotation_original,
 
 
     dataset = GTZANDataset(path_annotation_original,
-                           n_samples=n_samples,
-                           transformation=transformation,
+                           n_examples=n_examples,
                            target_sample_rate=target_sample_rate,
                            chunks_len_sec=chunks_len_sec,
                            device=device,
                            folds=folds, 
-                           split=split)
+                           split=split,
+                           verbose_sample_wasting=verbose_sample_wasting)
 
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
     return dataloader, dataset
+
+
+            
 
 #%%
 
@@ -166,16 +218,13 @@ if __name__ == "__main__":
     )
 
 
-    chunks_len_sec = 14.
-
     dataloader, dataset = create_data_loader(path_annotation_original,
-                                             n_samples=None,
-                                             transformation=None,
+                                             n_examples=None,
                                              target_sample_rate=sample_rate,
                                              chunks_len_sec=chunks_len_sec,
                                              device=device,
                                              batch_size=batch_size,
-                                             split='train')
+                                             split='test',)
 
     dataloader_it = iter(dataloader)
     dataloader_out = next(dataloader_it)
