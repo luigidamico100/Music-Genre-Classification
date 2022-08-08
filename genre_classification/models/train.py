@@ -91,17 +91,21 @@ def train(model, train_dataloader, val_dataloader, loss_fn, optimiser, device, e
     val_data = []
     start_time = time.time()
     best_val_loss = np.inf
-    for i in range(epochs):
-        print(f"Epoch {i + 1}")
+    best_epoch = None
+    for i in range(1, epochs+1):
+        print(f"Epoch {i}")
         train_data.append(train_single_epoch(model, train_dataloader, loss_fn, optimiser, device))
         val_data.append(validate_single_epoch(model, val_dataloader, loss_fn, device))
         if val_data[-1][0] < best_val_loss:
             best_model = copy.deepcopy(model)
             best_val_loss = val_data[-1][0]
+            best_epoch = i
             print('Best model found')
         print("---------------------------")
     end_time = time.time()
-    print(f"Finished training. Elapsed time: {(end_time - start_time) / 60.:.2f} mins")
+    print('Training finished! :)')
+    logging.info(f'Best model found in epoch: {best_epoch}')
+    logging.info('Elapsed time: {(end_time - start_time) / 60.:.2f} mins')
 
     train_data = np.array(train_data)
     val_data = np.array(val_data)
@@ -205,7 +209,7 @@ def main(train_debug_mode, experiment_name, epochs, learning_rate, chunks_len_se
     # construct model and assign it to device
     cnn = CNNNetwork().to(device)
     logging.info(cnn.__str__())
-    summary(cnn, (1, 400, 400))
+    summary(cnn, (1, 64, 603))
 
     # initialise loss function + optimiser
     loss_fn = nn.CrossEntropyLoss()
