@@ -15,6 +15,22 @@ path_raw_features_30_sec = os.path.join(project_root_path, 'data', 'raw', 'featu
 path_annotation_original = os.path.join(project_root_path, 'data', 'interim', 'annotation.csv')
 
 # Experiment
-experiment_name = '_trial'
-path_training_experiments = os.path.join(project_root_path, 'models')
+experiment_name = 'trial'
+path_training_experiments = os.path.join(project_root_path, 'models', 'experiments')
+
+def get_path_experiment(experiment_name, file_type=None):
+    
+    if not file_type:
+        return os.path.join(path_training_experiments, experiment_name)
+    
+    assert file_type in ['df_training_data', 'training_plot', 'best_model']
+    
+    if file_type=='df_training_data':
+        file_name = 'df_training_data.csv'
+    elif file_type=='training_plot':
+        file_name = 'training_plot.jpg'
+    elif file_type=='best_model':
+        file_name = 'best_model.pth'
+    
+    return os.path.join(path_training_experiments, experiment_name, file_name)
 ##########################################################################################################

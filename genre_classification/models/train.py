@@ -13,7 +13,7 @@ import os
 import time
 from genre_classification.models.cnn import CNNNetwork
 from genre_classification.models.dataset import create_data_loader, GTZANDataset
-from genre_classification.paths import path_annotation_original, path_training_experiments, experiment_name
+from genre_classification.paths import path_annotation_original, experiment_name, get_path_experiment
 from genre_classification.models.config import (
     device,
     batch_size,
@@ -110,7 +110,7 @@ def train(model, train_dataloader, val_dataloader, loss_fn, optimiser, device, e
     return df_training_data, best_model
 
 
-def save_training_data(df_training_data, path_experiment=None, model=None):
+def save_training_data(df_training_data, experiment_name=None, model=None):
     with sns.axes_style("darkgrid"):
         fig, axs = plt.subplots(2, 1)
         sns.lineplot(data=df_training_data, x=df_training_data.index, y='train_loss', label='train_loss', ax=axs[0])
@@ -121,20 +121,25 @@ def save_training_data(df_training_data, path_experiment=None, model=None):
         axs[1].set_ylabel('Accuracy')
         plt.tight_layout()
 
-    if path_experiment:
+    if experiment_name:
+        path_experiment = get_path_experiment(experiment_name)
+    
         try:
             os.mkdir(path_experiment)
         except FileExistsError:
             pass
 
-        print(f'Saving results to: {path_experiment}')
-        path_df_training_data = os.path.join(path_experiment, 'df_training_data.csv')
-        path_training_plot = os.path.join(path_experiment, 'training_plot.jpg')
-        path_model = os.path.join(path_experiment, 'model.pth')
-
+        path_df_training_data = get_path_experiment(experiment_name, file_type='df_training_data')
+        path_training_plot = get_path_experiment(experiment_name, file_type='training_plot')
+        path_best_model = get_path_experiment(experiment_name, file_type='best_model')
+        
+        print(f'Saving df_training_data to {path_df_training_data}')
         df_training_data.to_csv(path_df_training_data)
+        print(f'Saving training_plot to {path_training_plot}')
         fig.savefig(path_training_plot)
-        torch.save(model.state_dict(), path_model)
+        print(f'Saving best_model to {path_best_model}')
+        torch.save(model.state_dict(), path_best_model)
+    
 
 #%%
 
@@ -152,8 +157,12 @@ def main(epochs, train_debug_mode, learning_rate, experiment_name, chunks_len_se
     learning_rate = args.learning_rate
     experiment_name = args.experiment_name
     chunks_len_sec = args.chunks_len_sec
-    path_training_experiment = os.path.join(path_training_experiments, experiment_name)
+    
     print(f'train_debug_mode={train_debug_mode}, epochs={epochs},  experiment_name={experiment_name}, learning_rate={learning_rate}, chunks_len_sec={chunks_len_sec}')
+
+
+
+    
 
     train_dataloader, train_dataset = create_data_loader(path_annotation_original,
                                                          n_samples=10 if train_debug_mode else None,
@@ -190,9 +199,9 @@ def main(epochs, train_debug_mode, learning_rate, experiment_name, chunks_len_se
                                          loss_fn=loss_fn,
                                          optimiser=optimiser,
                                          device=device,
-                                         epochs=epochs)
+                                         epochs=5 if train_debug_mode else epochs)
 
-    save_training_data(df_training_data, path_experiment=path_training_experiment, model=best_model)
+    save_training_data(df_training_data, experiment_name=experiment_name, model=best_model)
 
 
 if __name__ == "__main__":
