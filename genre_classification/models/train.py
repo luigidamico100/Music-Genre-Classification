@@ -1,6 +1,5 @@
 import copy
 import torch
-import torchaudio
 from torch import nn
 from torchinfo import summary
 from torchmetrics import Accuracy
@@ -12,7 +11,7 @@ import pandas as pd
 import os
 import time
 from genre_classification.models.cnn import CNNNetwork
-from genre_classification.models.dataset import create_data_loader, GTZANDataset
+from genre_classification.models.dataset import create_data_loader
 from genre_classification.paths import path_annotation_original, experiment_name, get_path_experiment
 from genre_classification.models.config import (
     device,
@@ -25,7 +24,6 @@ from genre_classification.models.config import (
     set_logger
 )
 import logging
-import sys
 import json
 
 

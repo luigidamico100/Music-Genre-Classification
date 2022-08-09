@@ -6,30 +6,19 @@ Created on Sun Aug  7 23:43:09 2022
 @author: luigi
 """
 
-import copy
 import torch
-import torchaudio
-from torch import nn
-from torchinfo import summary
 from torchmetrics import Accuracy
 import numpy as np
-import matplotlib.pyplot as plt
 import argparse
-import seaborn as sns
 import pandas as pd
-import os
-import time
 from genre_classification.models.cnn import CNNNetwork
-from genre_classification.models.dataset import create_data_loader, GTZANDataset
+from genre_classification.models.dataset import create_data_loader
 from genre_classification.paths import path_annotation_original, experiment_name, get_path_experiment
 from genre_classification.models.config import (
     device,
     batch_size,
     sample_rate,
-    set_logger
 )
-import logging
-import sys
 import json
 from sklearn.metrics import accuracy_score, confusion_matrix, f1_score
 
@@ -37,7 +26,6 @@ from sklearn.metrics import accuracy_score, confusion_matrix, f1_score
 
 def evaluate(model, dataloader, device):
     model.eval()
-    accuracy = Accuracy().to(device)
     prediction_overall = torch.empty((0,)).to(device)
     target_overall = torch.empty((0,)).to(device)
     with torch.no_grad():
