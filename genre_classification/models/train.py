@@ -26,6 +26,7 @@ from genre_classification.models.config import (
 )
 import logging
 import sys
+import json
 
 
 def train_single_epoch(model, dataloader, loss_fn, optimiser, device):
@@ -117,7 +118,7 @@ def train(model, train_dataloader, val_dataloader, loss_fn, optimiser, device, e
     return df_training_data, best_model
 
 
-def save_training_data(df_training_data, experiment_name=None, model=None):
+def save_training_data(df_training_data, params, model=None):
     with sns.axes_style("darkgrid"):
         fig, axs = plt.subplots(2, 1)
         sns.lineplot(data=df_training_data, x=df_training_data.index, y='train_loss', label='train_loss', ax=axs[0])
@@ -128,18 +129,22 @@ def save_training_data(df_training_data, experiment_name=None, model=None):
         axs[1].set_ylabel('Accuracy')
         plt.tight_layout()
 
-    if experiment_name:
+    experiment_name = params['experiment_name']
 
-        path_df_training_data = get_path_experiment(experiment_name, file_type='df_training_data')
-        path_training_plot = get_path_experiment(experiment_name, file_type='training_plot')
-        path_best_model = get_path_experiment(experiment_name, file_type='best_model')
-        
-        print(f'Saving df_training_data to {path_df_training_data}')
-        df_training_data.to_csv(path_df_training_data)
-        print(f'Saving training_plot to {path_training_plot}')
-        fig.savefig(path_training_plot)
-        print(f'Saving best_model to {path_best_model}')
-        torch.save(model.state_dict(), path_best_model)
+    path_df_training_data = get_path_experiment(experiment_name, file_type='df_training_data')
+    path_training_plot = get_path_experiment(experiment_name, file_type='training_plot')
+    path_best_model = get_path_experiment(experiment_name, file_type='best_model')
+    path_params = get_path_experiment(experiment_name, file_type='json')
+    
+    print(f'Saving df_training_data to {path_df_training_data}')
+    df_training_data.to_csv(path_df_training_data)
+    print(f'Saving training_plot to {path_training_plot}')
+    fig.savefig(path_training_plot)
+    print(f'Saving best_model to {path_best_model}')
+    torch.save(model.state_dict(), path_best_model)
+    print(f'Saving params json to {path_params}')
+    with open(path_params, 'w') as outfile:
+        json.dump(params, outfile)
     
 
 def get_params(train_debug_mode, experiment_name, epochs, learning_rate, chunks_len_sec):
@@ -158,11 +163,6 @@ def get_params(train_debug_mode, experiment_name, epochs, learning_rate, chunks_
     n_examples = 'all' if not train_debug_mode else 10
     epochs = args.epochs if not train_debug_mode else 5
     
-    return train_debug_mode, n_examples, experiment_name, epochs, learning_rate, chunks_len_sec
-
-
-def print_params(train_debug_mode, n_examples, experiment_name, epochs, learning_rate, chunks_len_sec):
-    
     logging.info(f'train_debug_mode={train_debug_mode}')
     logging.info(f'n_examples={n_examples}')
     logging.info(f'experiment_name={experiment_name}')
@@ -172,13 +172,29 @@ def print_params(train_debug_mode, n_examples, experiment_name, epochs, learning
     logging.info(f'chunks_len_sec={chunks_len_sec}')
     logging.info('')
     
+    params = {}
+    params['train_debug_mode'] = train_debug_mode
+    params['n_examples'] = n_examples
+    params['experiment_name'] = experiment_name
+    params['epochs'] = epochs
+    params['learning_rate'] = learning_rate
+    params['chunks_len_sec'] = chunks_len_sec
+    
+    return params
+    
+    
     
 #%%
 
 def main(train_debug_mode, experiment_name, epochs, learning_rate, chunks_len_sec):
     
     params = get_params(train_debug_mode, experiment_name, epochs, learning_rate, chunks_len_sec)
-    train_debug_mode, n_examples, experiment_name, epochs, learning_rate, chunks_len_sec = params
+    train_debug_mode = params['train_debug_mode']
+    n_examples = params['n_examples']
+    experiment_name = params['experiment_name']
+    epochs = params['epochs']
+    learning_rate = params['learning_rate']
+    chunks_len_sec = params['chunks_len_sec']
     
     path_experiment = get_path_experiment(experiment_name)
     try:
@@ -190,7 +206,7 @@ def main(train_debug_mode, experiment_name, epochs, learning_rate, chunks_len_se
         
     set_logger(path_logger)
         
-    print_params(train_debug_mode, n_examples, experiment_name, epochs, learning_rate, chunks_len_sec)
+    #save_params(train_debug_mode, n_examples, experiment_name, epochs, learning_rate, chunks_len_sec)
 
     train_dataloader, train_dataset = create_data_loader(path_annotation_original,
                                                          n_examples=n_examples,
@@ -225,9 +241,9 @@ def main(train_debug_mode, experiment_name, epochs, learning_rate, chunks_len_se
                                          loss_fn=loss_fn,
                                          optimiser=optimiser,
                                          device=device,
-                                         epochs=5 if train_debug_mode else epochs)
+                                         epochs=epochs)
 
-    save_training_data(df_training_data, experiment_name=experiment_name, model=best_model)
+    save_training_data(df_training_data, params=params, model=best_model)
 
 
 if __name__ == "__main__":
