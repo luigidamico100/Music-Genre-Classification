@@ -107,7 +107,7 @@ class GTZANDataset(Dataset):
             RandomApply([HighLowPass(sample_rate=22050)], p=0.8).to(self.device),
             RandomApply([Delay(sample_rate=22050)], p=0.5).to(self.device),
             #RandomApply([PitchShift(n_samples=self.num_samples, sample_rate=22050)], p=0.4).to(self.device),
-            RandomApply([Reverb(sample_rate=22050)], p=0.3).to(self.device),
+            #RandomApply([Reverb(sample_rate=22050)], p=0.3).to(self.device),
         ]
         self.augmentation = Compose(transforms=transforms)
 
