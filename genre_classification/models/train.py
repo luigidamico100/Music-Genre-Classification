@@ -151,18 +151,20 @@ def get_params(train_debug_mode, experiment_name, epochs, learning_rate, chunks_
     parser.add_argument('--experiment_name', type=str, help='experiment name', default=experiment_name)
     parser.add_argument('--chunks_len_sec', type=float, help='Chunks length (sec)', default=chunks_len_sec)
     args = parser.parse_args()
-    epochs = args.epochs
     train_debug_mode = args.train_debug_mode == 'True'
     learning_rate = args.learning_rate
     experiment_name = args.experiment_name
     chunks_len_sec = args.chunks_len_sec
+    n_examples = 'all' if not train_debug_mode else 10
+    epochs = args.epochs if not train_debug_mode else 5
     
-    return train_debug_mode, experiment_name, epochs, learning_rate, chunks_len_sec
+    return train_debug_mode, n_examples, experiment_name, epochs, learning_rate, chunks_len_sec
 
 
-def print_params(train_debug_mode, experiment_name, epochs, learning_rate, chunks_len_sec):
+def print_params(train_debug_mode, n_examples, experiment_name, epochs, learning_rate, chunks_len_sec):
     
     logging.info(f'train_debug_mode={train_debug_mode}')
+    logging.info(f'n_examples={n_examples}')
     logging.info(f'experiment_name={experiment_name}')
     logging.info('')
     logging.info(f'epochs={epochs}')
@@ -176,7 +178,7 @@ def print_params(train_debug_mode, experiment_name, epochs, learning_rate, chunk
 def main(train_debug_mode, experiment_name, epochs, learning_rate, chunks_len_sec):
     
     params = get_params(train_debug_mode, experiment_name, epochs, learning_rate, chunks_len_sec)
-    train_debug_mode, experiment_name, epochs, learning_rate, chunks_len_sec = params
+    train_debug_mode, n_examples, experiment_name, epochs, learning_rate, chunks_len_sec = params
     
     path_experiment = get_path_experiment(experiment_name)
     try:
@@ -188,10 +190,10 @@ def main(train_debug_mode, experiment_name, epochs, learning_rate, chunks_len_se
         
     set_logger(path_logger)
         
-    print_params(train_debug_mode, experiment_name, epochs, learning_rate, chunks_len_sec)
+    print_params(train_debug_mode, n_examples, experiment_name, epochs, learning_rate, chunks_len_sec)
 
     train_dataloader, train_dataset = create_data_loader(path_annotation_original,
-                                                         n_examples=10 if train_debug_mode else None,
+                                                         n_examples=n_examples,
                                                          target_sample_rate=sample_rate,
                                                          chunks_len_sec=chunks_len_sec,
                                                          device=device,
@@ -199,7 +201,7 @@ def main(train_debug_mode, experiment_name, epochs, learning_rate, chunks_len_se
                                                          split='train')
 
     val_dataloader, val_dataset = create_data_loader(path_annotation_original,
-                                                     n_examples=10 if train_debug_mode else None,
+                                                     n_examples=n_examples,
                                                      target_sample_rate=sample_rate,
                                                      chunks_len_sec=chunks_len_sec,
                                                      device=device,

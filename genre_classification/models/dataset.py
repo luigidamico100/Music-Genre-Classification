@@ -18,12 +18,12 @@ from torchaudio_augmentations import (
 )
 
 
+
 class GTZANDataset(Dataset):
 
     def __init__(self,
                  annotations_file_path,
-                 n_examples=None,
-                 augment=False,
+                 n_examples='all',
                  target_sample_rate=None,
                  device=None,
                  folds=[0, 1, 2, 3, 4, 5],
@@ -33,7 +33,7 @@ class GTZANDataset(Dataset):
 
         self.annotations = pd.read_csv(annotations_file_path, index_col=0)
         self.annotations = self.annotations[self.annotations['fold'].isin(folds)]
-        if n_examples:
+        if n_examples!='all':
             self.annotations = self.annotations.sample(n_examples, random_state=42)
         assert split in ['train', 'val', 'test']
         self.split = split
@@ -97,6 +97,24 @@ class GTZANDataset(Dataset):
         signal = self.amplitude_to_db(signal)
         
         return signal, label
+    
+    def _get_augmentations_pytorch(self):
+        from torch import nn
+        transforms = nn.Sequential(
+            torchaudio.transforms.Vol()
+            )
+        
+        transforms = [
+            RandomResizedCrop(n_samples=self.num_samples).to(self.device),
+            RandomApply([PolarityInversion()], p=0.8).to(self.device),
+            #RandomApply([Noise(min_snr=0.3, max_snr=0.5)], p=0.3).to(self.device),
+            RandomApply([Gain()], p=0.2).to(self.device),
+            RandomApply([HighLowPass(sample_rate=22050)], p=0.8).to(self.device),
+            RandomApply([Delay(sample_rate=22050)], p=0.5).to(self.device),
+            #RandomApply([PitchShift(n_samples=self.num_samples, sample_rate=22050)], p=0.4).to(self.device),
+            #RandomApply([Reverb(sample_rate=22050)], p=0.3).to(self.device),
+        ]
+        self.augmentation = Compose(transforms=transforms)
 
     def _get_augmentations(self):
         transforms = [
@@ -221,7 +239,7 @@ if __name__ == "__main__":
 
 
     dataloader, dataset = create_data_loader(path_annotation_original,
-                                             n_examples=None,
+                                             n_examples='all',
                                              target_sample_rate=sample_rate,
                                              chunks_len_sec=chunks_len_sec,
                                              device=device,
