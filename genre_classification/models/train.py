@@ -105,7 +105,7 @@ def train(model, train_dataloader, val_dataloader, loss_fn, optimiser, device, e
     end_time = time.time()
     print('Training finished! :)')
     logging.info(f'Best model found in epoch: {best_epoch}')
-    logging.info('Elapsed time: {(end_time - start_time) / 60.:.2f} mins')
+    logging.info(f'Elapsed time: {(end_time - start_time) / 60.:.2f} mins')
 
     train_data = np.array(train_data)
     val_data = np.array(val_data)
