@@ -41,8 +41,8 @@ def evaluate(model, dataloader, device):
             prediction_overall = torch.cat((prediction_overall, predicted))
             target_overall = torch.cat((target_overall, target))
 
-    prediction_overall = np.array(prediction_overall, dtype=int)
-    target_overall = np.array(target_overall, dtype=int)
+    prediction_overall = np.array(prediction_overall.cpu(), dtype=int)
+    target_overall = np.array(target_overall.cpu(), dtype=int)
     
     metrics = {}
     metrics['accuracy'] = accuracy_score(target_overall, prediction_overall)
