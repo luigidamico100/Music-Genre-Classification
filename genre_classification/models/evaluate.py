@@ -50,8 +50,8 @@ def evaluate(model, dataloader, device):
     metrics['confusion matrix norm'] = confusion_matrix(target_overall, prediction_overall, normalize='true')
     metrics['f1 score'] = f1_score(target_overall, prediction_overall, average='weighted')
     
-    print(f"ccuracy = {metrics['accuracy']}")
-    print(f"confusion matrix = \n {metrics['confusion matrix']}")
+    print(f"Accuracy = {metrics['accuracy']}")
+    print(f"Confusion matrix = \n {metrics['confusion matrix']}")
     print(f"f1 score = {metrics['f1 score']}")
 
     return metrics

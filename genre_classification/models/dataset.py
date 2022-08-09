@@ -87,11 +87,13 @@ class GTZANDataset(Dataset):
         # signal = self.cut(signal)
         # signal = self.right_pad(signal)
         if self.training:
-            signal = signal.unsqueeze(0)
-            #signal = signal.to('cpu')
-            signal = self.augmentation(signal)
-            #signal = signal.to(self.device)
-            signal = signal.squeeze(0)
+            # signal = signal.unsqueeze(0)
+            # #signal = signal.to('cpu')
+            # signal = self.augmentation(signal)
+            # #signal = signal.to(self.device)
+            # signal = signal.squeeze(0)
+            
+            signal = self.adjust_audio_len(signal)
         else:
             signal = self.get_signal_chunks(signal)
         signal = self.mel_spectrogram(signal)
@@ -142,17 +144,8 @@ class GTZANDataset(Dataset):
         return signal
     
     def adjust_audio_len(self, signal):
-        if self.split == 'train':
-            random_index = random.randint(0, len(signal) - self.num_samples - 1)
-            signal = signal[random_index : random_index + self.num_samples]
-        else:
-            num_chunks = len(signal) // self.num_samples
-            len_pre = len(signal)
-            signal = signal[:num_chunks*self.num_samples]
-            len_post = len(signal)
-            signal = torch.reshape(signal, (num_chunks, self.num_samples))
-            if self.verbose_sample_wasting:
-                print(f'Losed {len_pre - len_post} samples ({((len_pre-len_post)/self.target_sample_rate):.1f}) sec')
+        random_index = random.randint(0, len(signal) - self.num_samples - 1)
+        signal = signal[random_index : random_index + self.num_samples]
         return signal
         
     
