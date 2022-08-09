@@ -102,7 +102,7 @@ class GTZANDataset(Dataset):
         transforms = [
             RandomResizedCrop(n_samples=self.num_samples).to(self.device),
             RandomApply([PolarityInversion()], p=0.8).to(self.device),
-            RandomApply([Noise(min_snr=0.3, max_snr=0.5)], p=0.3).to(self.device),
+            #RandomApply([Noise(min_snr=0.3, max_snr=0.5)], p=0.3).to(self.device),
             RandomApply([Gain()], p=0.2).to(self.device),
             RandomApply([HighLowPass(sample_rate=22050)], p=0.8).to(self.device),
             RandomApply([Delay(sample_rate=22050)], p=0.5).to(self.device),
