@@ -18,29 +18,48 @@ path_annotation_original = os.path.join(project_root_path, 'data', 'interim', 'a
 experiment_name = 'trial'
 path_training_experiments = os.path.join(project_root_path, 'models', 'experiments')
 
-def get_path_experiment(experiment_name, file_type=None):
+def get_path_experiment(experiment_name, file_type, overwrite_existing_experiment=True):
     
-    if not file_type:
-        return os.path.join(path_training_experiments, experiment_name)
+    path_folder = os.path.join(path_training_experiments, experiment_name)
+    path_folder_training = os.path.join(path_folder, 'training')
+    path_folder_evaluation = os.path.join(path_folder, 'evaluation')
     
-    assert file_type in ['df_training_data', 'training_plot', 'best_model', 'logger', 'json', 'df_conf_matrix', 'df_conf_matrix_norm', 'metrics']
+    try:
+        os.mkdir(path_folder)
+        os.mkdir(path_folder_training)
+        os.mkdir(path_folder_evaluation)
+    except FileExistsError:
+        if overwrite_existing_experiment:
+            pass
+        else:
+            raise FileExistsError
     
-    if file_type=='df_training_data':
-        file_name = 'df_training_data.csv'
+    assert file_type in ['df_training_history', 'training_plot', 'best_model', 'logger', 'json', 'df_conf_matrix', 'df_conf_matrix_norm', 'metrics']
+    
+    if file_type=='df_training_history':
+        file_name = 'df_training_history.csv'
+        path_file = os.path.join(path_folder_training, file_name)
     elif file_type=='training_plot':
         file_name = 'training_plot.jpg'
+        path_file = os.path.join(path_folder_training, file_name)
     elif file_type=='best_model':
         file_name = 'best_model.pth'
+        path_file = os.path.join(path_folder, file_name)
     elif file_type=='logger':
         file_name = 'training_log.log'
+        path_file = os.path.join(path_folder_training, file_name)
     elif file_type=='json':
         file_name = 'params.json'
+        path_file = os.path.join(path_folder, file_name)
     elif file_type=='metrics':
         file_name = 'metrics.txt'
+        path_file = os.path.join(path_folder_evaluation, file_name)
     elif file_type=='df_conf_matrix':
         file_name = 'df_confusion_matrix.csv'
+        path_file = os.path.join(path_folder_evaluation, file_name)
     elif file_type=='df_conf_matrix_norm':
         file_name = 'df_confusion_matrix_norm.csv'
+        path_file = os.path.join(path_folder_evaluation, file_name)
     
-    return os.path.join(path_training_experiments, experiment_name, file_name)
+    return path_file
 ##########################################################################################################

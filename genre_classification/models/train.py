@@ -109,33 +109,33 @@ def train(model, train_dataloader, val_dataloader, loss_fn, optimiser, device, e
     train_data = np.array(train_data)
     val_data = np.array(val_data)
     training_data = np.concatenate((train_data, val_data), axis=1)
-    df_training_data = pd.DataFrame(training_data, columns=['train_loss', 'train_acc', 'val_loss', 'val_acc'])
-    df_training_data.index = df_training_data.index + 1
-    df_training_data.index.name = 'epoch'
+    df_training_history = pd.DataFrame(training_data, columns=['train_loss', 'train_acc', 'val_loss', 'val_acc'])
+    df_training_history.index = df_training_history.index + 1
+    df_training_history.index.name = 'epoch'
 
-    return df_training_data, best_model
+    return df_training_history, best_model
 
 
-def save_training_data(df_training_data, params, model=None):
+def save_training_data(df_training_history, params, model=None):
     with sns.axes_style("darkgrid"):
         fig, axs = plt.subplots(2, 1)
-        sns.lineplot(data=df_training_data, x=df_training_data.index, y='train_loss', label='train_loss', ax=axs[0])
-        sns.lineplot(data=df_training_data, x=df_training_data.index, y='val_loss', label='val_loss', ax=axs[0])
+        sns.lineplot(data=df_training_history, x=df_training_history.index, y='train_loss', label='train_loss', ax=axs[0])
+        sns.lineplot(data=df_training_history, x=df_training_history.index, y='val_loss', label='val_loss', ax=axs[0])
         axs[0].set_ylabel('Loss')
-        sns.lineplot(data=df_training_data, x=df_training_data.index, y='train_acc', label='train_acc', ax=axs[1])
-        sns.lineplot(data=df_training_data, x=df_training_data.index, y='val_acc', label='val_acc', ax=axs[1])
+        sns.lineplot(data=df_training_history, x=df_training_history.index, y='train_acc', label='train_acc', ax=axs[1])
+        sns.lineplot(data=df_training_history, x=df_training_history.index, y='val_acc', label='val_acc', ax=axs[1])
         axs[1].set_ylabel('Accuracy')
         plt.tight_layout()
 
     experiment_name = params['experiment_name']
 
-    path_df_training_data = get_path_experiment(experiment_name, file_type='df_training_data')
+    path_df_training_history = get_path_experiment(experiment_name, file_type='df_training_history')
     path_training_plot = get_path_experiment(experiment_name, file_type='training_plot')
     path_best_model = get_path_experiment(experiment_name, file_type='best_model')
     path_params = get_path_experiment(experiment_name, file_type='json')
     
-    print(f'Saving df_training_data to {path_df_training_data}')
-    df_training_data.to_csv(path_df_training_data)
+    print(f'Saving df_training_history to {path_df_training_history}')
+    df_training_history.to_csv(path_df_training_history)
     print(f'Saving training_plot to {path_training_plot}')
     fig.savefig(path_training_plot)
     print(f'Saving best_model to {path_best_model}')
@@ -194,12 +194,6 @@ def main(train_debug_mode, experiment_name, epochs, learning_rate, chunks_len_se
     learning_rate = params['learning_rate']
     chunks_len_sec = params['chunks_len_sec']
     
-    path_experiment = get_path_experiment(experiment_name)
-    try:
-        os.mkdir(path_experiment)
-    except FileExistsError:
-        pass
-    
     path_logger = get_path_experiment(experiment_name, file_type='logger')
         
     set_logger(path_logger)
@@ -233,7 +227,7 @@ def main(train_debug_mode, experiment_name, epochs, learning_rate, chunks_len_se
                                  lr=learning_rate)
 
     # train model
-    df_training_data, best_model = train(model=cnn,
+    df_training_history, best_model = train(model=cnn,
                                          train_dataloader=train_dataloader,
                                          val_dataloader=val_dataloader,
                                          loss_fn=loss_fn,
@@ -241,7 +235,7 @@ def main(train_debug_mode, experiment_name, epochs, learning_rate, chunks_len_se
                                          device=device,
                                          epochs=epochs)
 
-    save_training_data(df_training_data, params=params, model=best_model)
+    save_training_data(df_training_history, params=params, model=best_model)
 
 
 if __name__ == "__main__":
