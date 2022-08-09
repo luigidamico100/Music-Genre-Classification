@@ -42,7 +42,8 @@ class GTZANDataset(Dataset):
         self.target_sample_rate = target_sample_rate
         self.num_samples = int(self.target_sample_rate * chunks_len_sec)
         #self.transformation = transformation.to(device)
-        self.genre_to_class = {genre: idx for idx, genre in enumerate(self.annotations['genre'].unique())}
+        self.genres = list(self.annotations['genre'].unique())
+        self.genre_to_class = {genre: idx for idx, genre in enumerate(self.genres)}
         self.class_to_genre = {self.genre_to_class[genre]: genre for genre in self.genre_to_class}
         self.verbose_sample_wasting = verbose_sample_wasting
         if self.training:

@@ -23,7 +23,7 @@ def get_path_experiment(experiment_name, file_type=None):
     if not file_type:
         return os.path.join(path_training_experiments, experiment_name)
     
-    assert file_type in ['df_training_data', 'training_plot', 'best_model', 'logger', 'json']
+    assert file_type in ['df_training_data', 'training_plot', 'best_model', 'logger', 'json', 'df_conf_matrix', 'df_conf_matrix_norm', 'metrics']
     
     if file_type=='df_training_data':
         file_name = 'df_training_data.csv'
@@ -35,6 +35,12 @@ def get_path_experiment(experiment_name, file_type=None):
         file_name = 'training_log.log'
     elif file_type=='json':
         file_name = 'params.json'
+    elif file_type=='metrics':
+        file_name = 'metrics.txt'
+    elif file_type=='df_conf_matrix':
+        file_name = 'df_confusion_matrix.csv'
+    elif file_type=='df_conf_matrix_norm':
+        file_name = 'df_confusion_matrix_norm.csv'
     
     return os.path.join(path_training_experiments, experiment_name, file_name)
 ##########################################################################################################

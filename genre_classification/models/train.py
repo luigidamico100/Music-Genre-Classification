@@ -160,8 +160,8 @@ def get_params(train_debug_mode, experiment_name, epochs, learning_rate, chunks_
     learning_rate = args.learning_rate
     experiment_name = args.experiment_name
     chunks_len_sec = args.chunks_len_sec
-    n_examples = 'all' if not train_debug_mode else 10
-    epochs = args.epochs if not train_debug_mode else 5
+    n_examples = 'all' if not train_debug_mode else 50
+    epochs = args.epochs if not train_debug_mode else 3
     
     logging.info(f'train_debug_mode={train_debug_mode}')
     logging.info(f'n_examples={n_examples}')
