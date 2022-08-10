@@ -57,11 +57,11 @@ def evaluate(model, dataloader, device):
     return metrics
 
 
-def save_evaluation_data(metrics, genres, experiment_name):
+def save_evaluation_data(metrics, genres, experiment_name, set_='val'):
     
-    path_df_conf_matrix = get_path_experiment(experiment_name, file_type='df_conf_matrix')
-    path_df_conf_matrix_norm = get_path_experiment(experiment_name, file_type='df_conf_matrix_norm')
-    path_metrics = get_path_experiment(experiment_name, file_type='metrics')
+    path_df_conf_matrix = get_path_experiment(experiment_name, file_type=f'df_conf_matrix_{set_}')
+    path_df_conf_matrix_norm = get_path_experiment(experiment_name, file_type=f'df_conf_matrix_norm_{set_}')
+    path_metrics = get_path_experiment(experiment_name, file_type=f'metrics_{set_}')
     
     print(f'Saving metrics to {path_metrics}')
     metrics_text = f"Accuracy = {metrics['accuracy']:.3f}\nf1 score = {metrics['f1 score']:.3f}"
@@ -121,10 +121,19 @@ def main(experiment_name):
                                                      batch_size=batch_size,
                                                      split='val')
     
+    test_dataloader, test_dataset = create_data_loader(path_annotation_original,
+                                                     n_examples=n_examples,
+                                                     target_sample_rate=sample_rate,
+                                                     chunks_len_sec=chunks_len_sec,
+                                                     device=device,
+                                                     batch_size=batch_size,
+                                                     split='test')    
+    metrics_val = evaluate(cnn, val_dataloader, device)
     
-    metrics = evaluate(cnn, val_dataloader, device)
+    metrics_test = evaluate(cnn, test_dataloader, device)
     
-    save_evaluation_data(metrics, val_dataset.genres, experiment_name)
+    save_evaluation_data(metrics_val, val_dataset.genres, experiment_name, set_='val')
+    save_evaluation_data(metrics_test, test_dataset.genres, experiment_name, set_='test')
     
     
 if __name__=='__main__':

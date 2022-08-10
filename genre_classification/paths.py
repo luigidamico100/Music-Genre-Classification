@@ -34,7 +34,10 @@ def get_path_experiment(experiment_name, file_type, overwrite_existing_experimen
         else:
             raise FileExistsError
     
-    assert file_type in ['df_training_history', 'training_plot', 'best_model', 'training_log', 'json', 'df_conf_matrix', 'df_conf_matrix_norm', 'metrics']
+    admitted_file_type = ['df_training_history', 'training_plot', 'best_model', 'training_log', 'json', 
+                          'df_conf_matrix_val', 'df_conf_matrix_norm_val', 'metrics_val',
+                          'df_conf_matrix_test', 'df_conf_matrix_norm_test', 'metrics_test',]
+    assert file_type in admitted_file_type
     
     if file_type=='df_training_history':
         file_name = 'df_training_history.csv'
@@ -51,14 +54,23 @@ def get_path_experiment(experiment_name, file_type, overwrite_existing_experimen
     elif file_type=='json':
         file_name = 'params.json'
         path_file = os.path.join(path_folder, file_name)
-    elif file_type=='metrics':
-        file_name = 'metrics.txt'
+    elif file_type=='metrics_val':
+        file_name = 'metrics_val.txt'
         path_file = os.path.join(path_folder_evaluation, file_name)
-    elif file_type=='df_conf_matrix':
-        file_name = 'df_confusion_matrix.csv'
+    elif file_type=='df_conf_matrix_val':
+        file_name = 'df_confusion_matrix_val.csv'
         path_file = os.path.join(path_folder_evaluation, file_name)
-    elif file_type=='df_conf_matrix_norm':
-        file_name = 'df_confusion_matrix_norm.csv'
+    elif file_type=='df_conf_matrix_norm_val':
+        file_name = 'df_confusion_matrix_norm_val.csv'
+        path_file = os.path.join(path_folder_evaluation, file_name)
+    elif file_type=='metrics_test':
+        file_name = 'metrics_test.txt'
+        path_file = os.path.join(path_folder_evaluation, file_name)
+    elif file_type=='df_conf_matrix_test':
+        file_name = 'df_confusion_matrix_test.csv'
+        path_file = os.path.join(path_folder_evaluation, file_name)
+    elif file_type=='df_conf_matrix_norm_test':
+        file_name = 'df_confusion_matrix_norm_test.csv'
         path_file = os.path.join(path_folder_evaluation, file_name)
     
     return path_file
