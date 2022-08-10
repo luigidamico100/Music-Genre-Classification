@@ -21,7 +21,6 @@ from genre_classification.models.config import (
     sample_rate,
     chunks_len_sec,
     train_debug_mode,
-    set_logger
 )
 import json
 from genre_classification.models.config import MyLogger
