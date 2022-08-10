@@ -48,10 +48,6 @@ def evaluate(model, dataloader, device):
     metrics['confusion matrix'] = confusion_matrix(target_overall, prediction_overall)
     metrics['confusion matrix norm'] = confusion_matrix(target_overall, prediction_overall, normalize='true')
     metrics['f1 score'] = f1_score(target_overall, prediction_overall, average='weighted')
-    
-    print(f"Accuracy = {metrics['accuracy']}")
-    print(f"Confusion matrix = \n {metrics['confusion matrix']}")
-    print(f"f1 score = {metrics['f1 score']}")
 
     return metrics
 
@@ -61,6 +57,12 @@ def save_evaluation_data(metrics, genres, experiment_name, set_='val'):
     path_df_conf_matrix = get_path_experiment(experiment_name, file_type=f'df_conf_matrix_{set_}')
     path_df_conf_matrix_norm = get_path_experiment(experiment_name, file_type=f'df_conf_matrix_norm_{set_}')
     path_metrics = get_path_experiment(experiment_name, file_type=f'metrics_{set_}')
+    
+    print(f'--------- Metrics on {set_} ---------')
+    print(f"Accuracy = {metrics['accuracy']}")
+    print(f"Confusion matrix = \n {metrics['confusion matrix']}")
+    print(f"f1 score = {metrics['f1 score']}")
+    print()
     
     print(f'Saving metrics_{set_} to {path_metrics}')
     metrics_text = f"Accuracy = {metrics['accuracy']:.3f}\nf1 score = {metrics['f1 score']:.3f}"
@@ -74,7 +76,8 @@ def save_evaluation_data(metrics, genres, experiment_name, set_='val'):
     print(f'Saving df_conf_matrix_norm_{set_} to {path_df_conf_matrix_norm}')
     df_conf_matrix = pd.DataFrame(data=metrics['confusion matrix norm'], columns=genres, index=genres)
     df_conf_matrix.to_csv(path_df_conf_matrix_norm)
-        
+    
+    print()
     
 
 def get_experiment_name(experiment_name):
