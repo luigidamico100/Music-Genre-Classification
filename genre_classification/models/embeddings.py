@@ -59,10 +59,12 @@ def save_embeddings_data(dfs, experiment_name, set_='val'):
     path_df_embeddings = get_path_experiment(experiment_name, file_type=f'df_embeddings_{set_}')
     path_df_genres = get_path_experiment(experiment_name, file_type=f'df_genres_{set_}')
     
+    print(f'--------- {set_} ---------')
     print(f'Saving df_embeddings_{set_} to {path_df_embeddings}')
     df_embeddings.to_csv(path_df_embeddings, index=False, header=False, sep='\t')
-    print(f'Saving df_genres_{set_}to {path_df_genres}')
+    print(f'Saving df_genres_{set_} to {path_df_genres}')
     df_genres.to_csv(path_df_genres, index=False, sep='\t')
+    print()
     
     
     

@@ -58,7 +58,7 @@ def save_evaluation_data(metrics, genres, experiment_name, set_='val'):
     path_df_conf_matrix_norm = get_path_experiment(experiment_name, file_type=f'df_conf_matrix_norm_{set_}')
     path_metrics = get_path_experiment(experiment_name, file_type=f'metrics_{set_}')
     
-    print(f'--------- Metrics on {set_} ---------')
+    print(f'--------- {set_} ---------')
     print(f"Accuracy = {metrics['accuracy']}")
     print(f"f1 score = {metrics['f1 score']}")
     print(f"Confusion matrix = \n {metrics['confusion matrix']}")
