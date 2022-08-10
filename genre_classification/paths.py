@@ -23,11 +23,13 @@ def get_path_experiment(experiment_name, file_type, overwrite_existing_experimen
     path_folder = os.path.join(path_training_experiments, experiment_name)
     path_folder_training = os.path.join(path_folder, 'training')
     path_folder_evaluation = os.path.join(path_folder, 'evaluation')
+    path_folder_embeddings = os.path.join(path_folder, 'embeddings')
     
     try:
         os.mkdir(path_folder)
         os.mkdir(path_folder_training)
         os.mkdir(path_folder_evaluation)
+        os.mkdir(path_folder_embeddings)
     except FileExistsError:
         if overwrite_existing_experiment:
             pass
@@ -36,7 +38,11 @@ def get_path_experiment(experiment_name, file_type, overwrite_existing_experimen
     
     admitted_file_type = ['df_training_history', 'training_plot', 'best_model', 'training_log', 'json', 
                           'df_conf_matrix_val', 'df_conf_matrix_norm_val', 'metrics_val',
-                          'df_conf_matrix_test', 'df_conf_matrix_norm_test', 'metrics_test',]
+                          'df_conf_matrix_test', 'df_conf_matrix_norm_test', 'metrics_test',
+                          'df_embeddings_all', 'df_genres_all',     # not implemented
+                          'df_embeddings_train', 'df_genres_train', # not implemented
+                          'df_embeddings_val', 'df_genres_val',
+                          'df_embeddings_test', 'df_genres_test']
     assert file_type in admitted_file_type
     
     if file_type=='df_training_history':
@@ -72,6 +78,18 @@ def get_path_experiment(experiment_name, file_type, overwrite_existing_experimen
     elif file_type=='df_conf_matrix_norm_test':
         file_name = 'df_confusion_matrix_norm_test.csv'
         path_file = os.path.join(path_folder_evaluation, file_name)
+    elif file_type=='df_embeddings_val':
+        file_name = 'df_embeddings_val.csv'
+        path_file = os.path.join(path_folder_embeddings, file_name)
+    elif file_type=='df_genres_val':
+        file_name = 'df_genres_val.csv'
+        path_file = os.path.join(path_folder_embeddings, file_name)
+    elif file_type=='df_embeddings_test':
+        file_name = 'df_embeddings_test.csv'
+        path_file = os.path.join(path_folder_embeddings, file_name)
+    elif file_type=='df_genres_test':
+        file_name = 'df_genres_test.csv'
+        path_file = os.path.join(path_folder_embeddings, file_name)
     
     return path_file
 ##########################################################################################################

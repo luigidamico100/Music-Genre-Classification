@@ -29,9 +29,11 @@ class GTZANDataset(Dataset):
                  folds=[0, 1, 2, 3, 4, 5],
                  split='train',
                  chunks_len_sec=7.,
-                 verbose_sample_wasting=False):
+                 verbose_sample_wasting=False,
+                 return_wav_filename=False):
 
         self.annotations = pd.read_csv(annotations_file_path, index_col=0)
+        self.genres = list(self.annotations['genre'].unique())
         self.annotations = self.annotations[self.annotations['fold'].isin(folds)]
         if n_examples!='all':
             self.annotations = self.annotations.sample(n_examples, random_state=42)
@@ -42,7 +44,6 @@ class GTZANDataset(Dataset):
         self.target_sample_rate = target_sample_rate
         self.num_samples = int(self.target_sample_rate * chunks_len_sec)
         #self.transformation = transformation.to(device)
-        self.genres = list(self.annotations['genre'].unique())
         self.genre_to_class = {genre: idx for idx, genre in enumerate(self.genres)}
         self.class_to_genre = {self.genre_to_class[genre]: genre for genre in self.genre_to_class}
         self.verbose_sample_wasting = verbose_sample_wasting
@@ -57,6 +58,7 @@ class GTZANDataset(Dataset):
             normalized=False
         ).to(device)
         self.amplitude_to_db = torchaudio.transforms.AmplitudeToDB().to(device)
+        self.return_wav_filename = return_wav_filename
 
     def __len__(self):
         return len(self.annotations)
@@ -99,6 +101,9 @@ class GTZANDataset(Dataset):
         signal = self.mel_spectrogram(signal)
         signal = self.amplitude_to_db(signal)
         
+        if self.return_wav_filename:
+            wav_filename = self.annotations.iloc[idx]['wav_filename']
+            return signal, label, wav_filename
         return signal, label
     
     def _get_augmentations_pytorch(self):
@@ -188,7 +193,8 @@ def create_data_loader(path_annotation_original,
                        device='cpu',
                        batch_size=64,
                        split='train',
-                       verbose_sample_wasting=False):
+                       verbose_sample_wasting=False,
+                       return_wav_filename=False):
     
     if split == 'train':
         folds = list(range(0, 14))
@@ -211,7 +217,8 @@ def create_data_loader(path_annotation_original,
                            device=device,
                            folds=folds, 
                            split=split,
-                           verbose_sample_wasting=verbose_sample_wasting)
+                           verbose_sample_wasting=verbose_sample_wasting,
+                           return_wav_filename=return_wav_filename)
 
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
     return dataloader, dataset

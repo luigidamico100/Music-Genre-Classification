@@ -7,7 +7,6 @@ Created on Sun Aug  7 23:43:09 2022
 """
 
 import torch
-from torchmetrics import Accuracy
 import numpy as np
 import argparse
 import pandas as pd
@@ -63,16 +62,16 @@ def save_evaluation_data(metrics, genres, experiment_name, set_='val'):
     path_df_conf_matrix_norm = get_path_experiment(experiment_name, file_type=f'df_conf_matrix_norm_{set_}')
     path_metrics = get_path_experiment(experiment_name, file_type=f'metrics_{set_}')
     
-    print(f'Saving metrics to {path_metrics}')
+    print(f'Saving metrics_{set_} to {path_metrics}')
     metrics_text = f"Accuracy = {metrics['accuracy']:.3f}\nf1 score = {metrics['f1 score']:.3f}"
     with open(path_metrics, 'w') as f:
         f.write(metrics_text)
         
-    print(f'Saving df_conf_matrix to {path_df_conf_matrix}')
+    print(f'Saving df_conf_matrix_{set_} to {path_df_conf_matrix}')
     df_conf_matrix = pd.DataFrame(data=metrics['confusion matrix'], columns=genres, index=genres)
     df_conf_matrix.to_csv(path_df_conf_matrix)
     
-    print(f'Saving df_conf_matrix_norm to {path_df_conf_matrix_norm}')
+    print(f'Saving df_conf_matrix_norm_{set_} to {path_df_conf_matrix_norm}')
     df_conf_matrix = pd.DataFrame(data=metrics['confusion matrix norm'], columns=genres, index=genres)
     df_conf_matrix.to_csv(path_df_conf_matrix_norm)
         
@@ -87,13 +86,13 @@ def get_experiment_name(experiment_name):
     
     return experiment_name
 
-def load_experiment(experiment_name):
+def load_experiment(experiment_name, return_embeddings=False):
     path_best_model = get_path_experiment(experiment_name, file_type='best_model')
     path_params = get_path_experiment(experiment_name, file_type='json')
     
     
     state_dict = torch.load(path_best_model)
-    model = CNNNetwork().to(device)
+    model = CNNNetwork(return_embeddings=return_embeddings).to(device)
     model.load_state_dict(state_dict)
     
     with open(path_params) as json_file:
