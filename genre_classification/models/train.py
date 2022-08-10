@@ -23,8 +23,8 @@ from genre_classification.models.config import (
     train_debug_mode,
     set_logger
 )
-import logging
 import json
+from genre_classification.models.config import MyLogger
 
 
 def train_single_epoch(model, dataloader, loss_fn, optimiser, device):
@@ -85,7 +85,7 @@ def validate_single_epoch(model, dataloader, loss_fn, device):
     return loss_overall, accuracy_overall
 
 
-def train(model, train_dataloader, val_dataloader, loss_fn, optimiser, device, epochs):
+def train(model, train_dataloader, val_dataloader, loss_fn, optimiser, device, epochs, mylogger):
     train_data = []
     val_data = []
     start_time = time.time()
@@ -103,8 +103,8 @@ def train(model, train_dataloader, val_dataloader, loss_fn, optimiser, device, e
         print("---------------------------")
     end_time = time.time()
     print('Training finished! :)')
-    logging.info(f'Best model found in epoch: {best_epoch}')
-    logging.info(f'Elapsed time: {(end_time - start_time) / 60.:.2f} mins')
+    mylogger.write(f'Best model found in epoch: {best_epoch}')
+    mylogger.write(f'Elapsed time: {(end_time - start_time) / 60.:.2f} mins')
 
     train_data = np.array(train_data)
     val_data = np.array(val_data)
@@ -116,7 +116,7 @@ def train(model, train_dataloader, val_dataloader, loss_fn, optimiser, device, e
     return df_training_history, best_model
 
 
-def save_training_data(df_training_history, params, model=None):
+def save_training_data(df_training_history, params, model, mylogger):
     with sns.axes_style("darkgrid"):
         fig, axs = plt.subplots(2, 1)
         sns.lineplot(data=df_training_history, x=df_training_history.index, y='train_loss', label='train_loss', ax=axs[0])
@@ -129,11 +129,14 @@ def save_training_data(df_training_history, params, model=None):
 
     experiment_name = params['experiment_name']
 
+    path_training_log = get_path_experiment(experiment_name, file_type='training_log')
     path_df_training_history = get_path_experiment(experiment_name, file_type='df_training_history')
     path_training_plot = get_path_experiment(experiment_name, file_type='training_plot')
     path_best_model = get_path_experiment(experiment_name, file_type='best_model')
     path_params = get_path_experiment(experiment_name, file_type='json')
     
+    print(f'Saving training_log to {path_training_log}')
+    mylogger.write_on_file(path_training_log)
     print(f'Saving df_training_history to {path_df_training_history}')
     df_training_history.to_csv(path_df_training_history)
     print(f'Saving training_plot to {path_training_plot}')
@@ -161,14 +164,14 @@ def get_params(train_debug_mode, experiment_name, epochs, learning_rate, chunks_
     n_examples = 'all' if not train_debug_mode else 50
     epochs = args.epochs if not train_debug_mode else 3
     
-    logging.info(f'train_debug_mode={train_debug_mode}')
-    logging.info(f'n_examples={n_examples}')
-    logging.info(f'experiment_name={experiment_name}')
-    logging.info('')
-    logging.info(f'epochs={epochs}')
-    logging.info(f'learning_rate={learning_rate}')
-    logging.info(f'chunks_len_sec={chunks_len_sec}')
-    logging.info('')
+    # mylogger.write(f'train_debug_mode={train_debug_mode}')
+    # mylogger.write(f'n_examples={n_examples}')
+    # mylogger.write(f'experiment_name={experiment_name}')
+    # mylogger.write('')
+    # mylogger.write(f'epochs={epochs}')
+    # mylogger.write(f'learning_rate={learning_rate}')
+    # mylogger.write(f'chunks_len_sec={chunks_len_sec}')
+    # mylogger.write('')
     
     params = {}
     params['train_debug_mode'] = train_debug_mode
@@ -194,10 +197,9 @@ def main(train_debug_mode, experiment_name, epochs, learning_rate, chunks_len_se
     learning_rate = params['learning_rate']
     chunks_len_sec = params['chunks_len_sec']
     
-    path_logger = get_path_experiment(experiment_name, file_type='logger')
-        
-    set_logger(path_logger)
-        
+    mylogger = MyLogger()
+    mylogger.write(str(params))
+         
     #save_params(train_debug_mode, n_examples, experiment_name, epochs, learning_rate, chunks_len_sec)
 
     train_dataloader, train_dataset = create_data_loader(path_annotation_original,
@@ -218,7 +220,7 @@ def main(train_debug_mode, experiment_name, epochs, learning_rate, chunks_len_se
 
     # construct model and assign it to device
     cnn = CNNNetwork().to(device)
-    logging.info(cnn.__str__())
+    mylogger.write(cnn.__str__())
     summary(cnn, (1, 64, 603))
 
     # initialise loss function + optimiser
@@ -233,9 +235,10 @@ def main(train_debug_mode, experiment_name, epochs, learning_rate, chunks_len_se
                                          loss_fn=loss_fn,
                                          optimiser=optimiser,
                                          device=device,
-                                         epochs=epochs)
+                                         epochs=epochs,
+                                         mylogger=mylogger)
 
-    save_training_data(df_training_history, params=params, model=best_model)
+    save_training_data(df_training_history, params=params, model=best_model, mylogger=mylogger)
 
 
 if __name__ == "__main__":

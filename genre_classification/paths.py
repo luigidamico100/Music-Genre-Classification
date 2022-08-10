@@ -34,7 +34,7 @@ def get_path_experiment(experiment_name, file_type, overwrite_existing_experimen
         else:
             raise FileExistsError
     
-    assert file_type in ['df_training_history', 'training_plot', 'best_model', 'logger', 'json', 'df_conf_matrix', 'df_conf_matrix_norm', 'metrics']
+    assert file_type in ['df_training_history', 'training_plot', 'best_model', 'training_log', 'json', 'df_conf_matrix', 'df_conf_matrix_norm', 'metrics']
     
     if file_type=='df_training_history':
         file_name = 'df_training_history.csv'
@@ -45,7 +45,7 @@ def get_path_experiment(experiment_name, file_type, overwrite_existing_experimen
     elif file_type=='best_model':
         file_name = 'best_model.pth'
         path_file = os.path.join(path_folder, file_name)
-    elif file_type=='logger':
+    elif file_type=='training_log':
         file_name = 'training_log.log'
         path_file = os.path.join(path_folder_training, file_name)
     elif file_type=='json':

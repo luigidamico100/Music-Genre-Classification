@@ -1,6 +1,4 @@
 import torch
-import logging
-import sys
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 print(f"Using device {device}")
@@ -17,15 +15,32 @@ sample_rate = 22050
 # num_samples = sample_rate * 29  # 29 sec of song
 chunks_len_sec = 14.
 
-def set_logger(path_logger):
+# def set_logger(logging, path_logger):
 
-    logging.basicConfig(level=logging.INFO,
-                        # format="%(message)s",
-                        format="%(message)s",
-                        handlers=[
-                            logging.FileHandler(path_logger),
-                            logging.StreamHandler(sys.stdout)
-                            ]
-                        )
+#     logging.basicConfig(level=logging.INFO,
+#                         # format="%(message)s",
+#                         format="%(message)s",
+#                         handlers=[
+#                             logging.FileHandler(path_logger),
+#                             logging.StreamHandler(sys.stdout)
+#                             ]
+#                         )
+    
+class MyLogger:
+    
+    def __init__(self):
+        self.text = ''
+        
+    def write(self, text):
+        print(text)
+        self.text += '\n\n' + text
+        
+    def write_on_file(self, filename):
+        with open(filename, 'w') as f:
+            f.write(self.text)
+            
+
+
+
 
 
