@@ -60,8 +60,8 @@ def save_evaluation_data(metrics, genres, experiment_name, set_='val'):
     
     print(f'--------- Metrics on {set_} ---------')
     print(f"Accuracy = {metrics['accuracy']}")
-    print(f"Confusion matrix = \n {metrics['confusion matrix']}")
     print(f"f1 score = {metrics['f1 score']}")
+    print(f"Confusion matrix = \n {metrics['confusion matrix']}")
     print()
     
     print(f'Saving metrics_{set_} to {path_metrics}')
