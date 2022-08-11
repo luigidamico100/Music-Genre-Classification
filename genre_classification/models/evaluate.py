@@ -120,25 +120,25 @@ def main(experiment_name):
     chunks_len_sec = params['chunks_len_sec']
     
     
-    val_dataloader, val_dataset = create_data_loader(path_annotation_original,
-                                                     path_class_to_genre_map,
-                                                     path_genre_to_class_map,
+    val_dataloader, val_dataset = create_data_loader(split='val',
+                                                     batch_size=batch_size,
+                                                     path_annotations_file=path_annotation_original,
+                                                     path_class_to_genre_map=path_class_to_genre_map,
+                                                     path_genre_to_class_map=path_genre_to_class_map,
                                                      n_examples=n_examples,
                                                      target_sample_rate=sample_rate,
                                                      chunks_len_sec=chunks_len_sec,
-                                                     device=device,
-                                                     batch_size=batch_size,
-                                                     split='val')
+                                                     device=device,)
     
-    test_dataloader, test_dataset = create_data_loader(path_annotation_original,
-                                                       path_class_to_genre_map,
-                                                       path_genre_to_class_map,
-                                                        n_examples=n_examples,
-                                                        target_sample_rate=sample_rate,
-                                                        chunks_len_sec=chunks_len_sec,
-                                                        device=device,
-                                                        batch_size=batch_size,
-                                                        split='test')    
+    test_dataloader, test_dataset = create_data_loader(split='test',
+                                                     batch_size=batch_size,
+                                                     path_annotations_file=path_annotation_original,
+                                                     path_class_to_genre_map=path_class_to_genre_map,
+                                                     path_genre_to_class_map=path_genre_to_class_map,
+                                                     n_examples=n_examples,
+                                                     target_sample_rate=sample_rate,
+                                                     chunks_len_sec=chunks_len_sec,
+                                                     device=device,)  
     metrics_val = evaluate(cnn, val_dataloader, device)
     
     metrics_test = evaluate(cnn, test_dataloader, device)

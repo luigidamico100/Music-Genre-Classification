@@ -192,17 +192,21 @@ class GTZANDataset(Dataset):
     #     return signal
 
 
-def create_data_loader(path_annotation_original,
-                       path_class_to_genre_map,
-                       path_genre_to_class_map,
-                       n_examples=None,
-                       target_sample_rate=None,
-                       chunks_len_sec=7.,
-                       device='cpu',
-                       batch_size=64,
-                       split='train',
-                       verbose_sample_wasting=False,
-                       return_wav_filename=False):
+# def create_data_loader(path_annotation_original,
+#                        path_class_to_genre_map,
+#                        path_genre_to_class_map,
+#                        n_examples=None,
+#                        target_sample_rate=None,
+#                        chunks_len_sec=7.,
+#                        device='cpu',
+#                        batch_size=64,
+#                        split='train',
+#                        verbose_sample_wasting=False,
+#                        return_wav_filename=False):
+    
+def create_data_loader(split='train', batch_size=128, **dataset_kwargs):
+    target_sample_rate = dataset_kwargs['target_sample_rate']
+    chunks_len_sec = dataset_kwargs['chunks_len_sec']
     
     if split == 'train':
         folds = list(range(0, 14))
@@ -218,17 +222,7 @@ def create_data_loader(path_annotation_original,
             raise ValueError
 
 
-    dataset = GTZANDataset(path_annotation_original,
-                           path_class_to_genre_map,
-                           path_genre_to_class_map,
-                           n_examples=n_examples,
-                           target_sample_rate=target_sample_rate,
-                           chunks_len_sec=chunks_len_sec,
-                           device=device,
-                           folds=folds, 
-                           split=split,
-                           verbose_sample_wasting=verbose_sample_wasting,
-                           return_wav_filename=return_wav_filename)
+    dataset = GTZANDataset(folds=folds, split=split, **dataset_kwargs)
 
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
     return dataloader, dataset
@@ -237,8 +231,7 @@ def create_data_loader(path_annotation_original,
             
 
 #%%
-
-if __name__ == "__main__":
+def main():
     import numpy as np
     from genre_classification.paths import (
         path_annotation_original,
@@ -253,15 +246,15 @@ if __name__ == "__main__":
     )
 
 
-    dataloader, dataset = create_data_loader(path_annotation_original,
-                                             path_class_to_genre_map,
-                                             path_genre_to_class_map,
+    dataloader, dataset = create_data_loader(split='val',
+                                             batch_size=batch_size,
+                                             path_annotations_file=path_annotation_original,
+                                             path_class_to_genre_map=path_class_to_genre_map,
+                                             path_genre_to_class_map=path_genre_to_class_map,
                                              n_examples='all',
                                              target_sample_rate=sample_rate,
                                              chunks_len_sec=chunks_len_sec,
-                                             device=device,
-                                             batch_size=batch_size,
-                                             split='test',)
+                                             device=device,)
 
     dataloader_it = iter(dataloader)
     dataloader_out = next(dataloader_it)
@@ -274,3 +267,8 @@ if __name__ == "__main__":
     print(dataloader_out[1].shape)
 
     sample = np.array(dataloader_out[0][0][0])
+    
+    
+if __name__ == "__main__":
+    main()
+    

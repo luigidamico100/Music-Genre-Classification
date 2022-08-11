@@ -207,25 +207,25 @@ def main(train_debug_mode, experiment_name, epochs, learning_rate, chunks_len_se
          
     #save_params(train_debug_mode, n_examples, experiment_name, epochs, learning_rate, chunks_len_sec)
 
-    train_dataloader, train_dataset = create_data_loader(path_annotation_original,
-                                                         path_class_to_genre_map,
-                                                         path_genre_to_class_map,
-                                                         n_examples=n_examples,
-                                                         target_sample_rate=sample_rate,
-                                                         chunks_len_sec=chunks_len_sec,
-                                                         device=device,
-                                                         batch_size=batch_size,
-                                                         split='train')
-
-    val_dataloader, val_dataset = create_data_loader(path_annotation_original,
-                                                     path_class_to_genre_map,
-                                                     path_genre_to_class_map,
+    train_dataloader, train_dataset = create_data_loader(split='train',
+                                                     batch_size=batch_size,
+                                                     path_annotations_file=path_annotation_original,
+                                                     path_class_to_genre_map=path_class_to_genre_map,
+                                                     path_genre_to_class_map=path_genre_to_class_map,
                                                      n_examples=n_examples,
                                                      target_sample_rate=sample_rate,
                                                      chunks_len_sec=chunks_len_sec,
-                                                     device=device,
+                                                     device=device,)
+
+    val_dataloader, val_dataset = create_data_loader(split='val',
                                                      batch_size=batch_size,
-                                                     split='val')
+                                                     path_annotations_file=path_annotation_original,
+                                                     path_class_to_genre_map=path_class_to_genre_map,
+                                                     path_genre_to_class_map=path_genre_to_class_map,
+                                                     n_examples=n_examples,
+                                                     target_sample_rate=sample_rate,
+                                                     chunks_len_sec=chunks_len_sec,
+                                                     device=device,)
 
     # construct model and assign it to device
     cnn = CNNNetwork().to(device)
