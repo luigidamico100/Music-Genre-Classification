@@ -47,7 +47,7 @@ def get_embeddings(model, dataloader, device, class_to_genre_map):
     df_genres['genres'] = df_genres['genres'].map(class_to_genre_map)
     
     return df_embeddings, df_genres
-    
+
 
 def save_embeddings_data(dfs, experiment_name, set_='val'):
     
@@ -68,8 +68,9 @@ def save_embeddings_data(dfs, experiment_name, set_='val'):
 #%%
 
 def main(config):
-
-    experiment_name = get_experiment_name(config.experiment_name)
+    parsed_params = config.parse_params(config, reason='evaluate')
+    experiment_name = parsed_params['experiment_name']
+    set_ = parsed_params['set']
     cnn, params = load_experiment(experiment_name, return_embeddings=True)
     
     n_examples = params['n_examples']
@@ -80,7 +81,7 @@ def main(config):
                               'hop_length': config.melspec_hop_length,
                               'n_mels': config.melspec_n_mels}
     
-    val_dataloader, val_dataset = create_data_loader(split='val',
+    dataloader, dataset = create_data_loader(set_=set_,
                                              batch_size=config.batch_size,
                                              mel_spectrogram_params=mel_spectrogram_params,
                                              path_annotations_file=path_annotation_original,
@@ -93,25 +94,10 @@ def main(config):
                                              device=config.device,
                                              return_wav_filename=True)
     
-    test_dataloader, test_dataset = create_data_loader(split='test',
-                                             batch_size=config.batch_size,
-                                             mel_spectrogram_params=mel_spectrogram_params,
-                                             path_annotations_file=path_annotation_original,
-                                             path_class_to_genre_map=path_class_to_genre_map,
-                                             path_genre_to_class_map=path_genre_to_class_map,
-                                             training=False,
-                                             n_examples=n_examples,
-                                             target_sample_rate=config.sample_rate,
-                                             chunks_len_sec=chunks_len_sec,
-                                             device=config.device,
-                                             return_wav_filename=True) 
-    
-    dfs_val = get_embeddings(cnn, val_dataloader, config.device, val_dataset.class_to_genre_map)
-    dfs_test = get_embeddings(cnn, test_dataloader, config.device, test_dataset.class_to_genre_map)
+    dfs = get_embeddings(cnn, dataloader, config.device, dataset.class_to_genre_map)
     
     
-    save_embeddings_data(dfs_val, experiment_name, set_='val')
-    save_embeddings_data(dfs_test, experiment_name, set_='test')
+    save_embeddings_data(dfs, experiment_name, set_=set_)
     
     
 if __name__=='__main__':

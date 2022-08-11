@@ -108,7 +108,9 @@ def load_experiment(experiment_name, return_embeddings=False, device='cpu'):
 
 def main(config):
 
-    experiment_name = get_experiment_name(config.experiment_name)
+    parsed_params = config.parse_params(config, reason='evaluate')
+    experiment_name = parsed_params['experiment_name']
+    set_ = parsed_params['set']
     cnn, params = load_experiment(experiment_name, device=config.device)
     
     n_examples = params['n_examples']
@@ -119,19 +121,7 @@ def main(config):
                               'hop_length': config.melspec_hop_length,
                               'n_mels': config.melspec_n_mels}
     
-    val_dataloader, val_dataset = create_data_loader(split='val',
-                                             batch_size=config.batch_size,
-                                             mel_spectrogram_params=mel_spectrogram_params,
-                                             path_annotations_file=path_annotation_original,
-                                             path_class_to_genre_map=path_class_to_genre_map,
-                                             path_genre_to_class_map=path_genre_to_class_map,
-                                             training=False,
-                                             n_examples=n_examples,
-                                             target_sample_rate=config.sample_rate,
-                                             chunks_len_sec=chunks_len_sec,
-                                             device=config.device,)
-    
-    test_dataloader, test_dataset = create_data_loader(split='test',
+    dataloader, dataset = create_data_loader(set_=set_,
                                              batch_size=config.batch_size,
                                              mel_spectrogram_params=mel_spectrogram_params,
                                              path_annotations_file=path_annotation_original,
@@ -144,12 +134,9 @@ def main(config):
                                              device=config.device,)
     
 
-    metrics_val = evaluate(cnn, val_dataloader, config.device)
+    metrics = evaluate(cnn, dataloader, config.device)
     
-    metrics_test = evaluate(cnn, test_dataloader, config.device)
-    
-    save_evaluation_data(metrics_val, val_dataset.genres, experiment_name, set_='val')
-    save_evaluation_data(metrics_test, test_dataset.genres, experiment_name, set_='test')
+    save_evaluation_data(metrics, dataset.genres, experiment_name, set_=set_)
     
     
 if __name__=='__main__':

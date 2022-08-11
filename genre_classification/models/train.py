@@ -5,7 +5,6 @@ from torchinfo import summary
 from torchmetrics import Accuracy
 import numpy as np
 import matplotlib.pyplot as plt
-import argparse
 import seaborn as sns
 import pandas as pd
 import time
@@ -141,42 +140,7 @@ def save_training_data(df_training_history, params, model, mylogger):
     print(f'Saving params json to {path_params}')
     with open(path_params, 'w') as outfile:
         json.dump(params, outfile)
-    
-
-def get_params(config):
-    parser = argparse.ArgumentParser(description='Training process')
-    parser.add_argument('--epochs', type=int, help='epochs number', default=config.epochs)
-    # parser.add_argument('--train_debug_mode', type=bool, help='Train debug mode', default=train_debug_mode, action=argparse.BooleanOptionalAction)
-    parser.add_argument('--train_debug_mode', type=str, help='Train debug mode', default=config.train_debug_mode)
-    parser.add_argument('--learning_rate', type=float, help='training learning rate', default=config.learning_rate)
-    parser.add_argument('--experiment_name', type=str, help='experiment name', default=config.experiment_name)
-    parser.add_argument('--chunks_len_sec', type=float, help='Chunks length (sec)', default=config.chunks_len_sec)
-    args = parser.parse_args()
-    train_debug_mode = args.train_debug_mode == 'True'
-    learning_rate = args.learning_rate
-    experiment_name = args.experiment_name
-    chunks_len_sec = args.chunks_len_sec
-    n_examples = 'all' if not train_debug_mode else 50
-    epochs = args.epochs if not train_debug_mode else 3
-    
-    # mylogger.write(f'train_debug_mode={train_debug_mode}')
-    # mylogger.write(f'n_examples={n_examples}')
-    # mylogger.write(f'experiment_name={experiment_name}')
-    # mylogger.write('')
-    # mylogger.write(f'epochs={epochs}')
-    # mylogger.write(f'learning_rate={learning_rate}')
-    # mylogger.write(f'chunks_len_sec={chunks_len_sec}')
-    # mylogger.write('')
-    
-    params = {}
-    params['train_debug_mode'] = train_debug_mode
-    params['n_examples'] = n_examples
-    params['experiment_name'] = experiment_name
-    params['epochs'] = epochs
-    params['learning_rate'] = learning_rate
-    params['chunks_len_sec'] = chunks_len_sec
-    
-    return params
+        
     
     
     
@@ -184,7 +148,7 @@ def get_params(config):
 
 def main(config):
     
-    params = get_params(config)
+    params = config.parse_params(config, reason='training')
     n_examples = params['n_examples']
     epochs = params['epochs']
     learning_rate = params['learning_rate']

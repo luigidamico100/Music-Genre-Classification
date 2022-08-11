@@ -30,7 +30,6 @@ class GTZANDataset(Dataset):
                  target_sample_rate=None,
                  device=None,
                  folds=[0, 1, 2, 3, 4, 5],
-                 split='train',
                  training=True,
                  chunks_len_sec=7.,
                  verbose_sample_wasting=False,
@@ -47,8 +46,6 @@ class GTZANDataset(Dataset):
         self.annotations = self.annotations[self.annotations['fold'].isin(folds)]
         if n_examples!='all':
             self.annotations = self.annotations.sample(n_examples, random_state=42)
-        assert split in ['train', 'val', 'test']
-        self.split = split
         self.training = training
         self.device = device
         self.target_sample_rate = target_sample_rate
@@ -203,29 +200,28 @@ class GTZANDataset(Dataset):
 #                        verbose_sample_wasting=False,
 #                        return_wav_filename=False):
     
-def create_data_loader(split='train', batch_size=128, mel_spectrogram_params=None, **dataset_kwargs):
+def create_data_loader(set_='train', batch_size=128, mel_spectrogram_params=None, **dataset_kwargs):
+    assert set_ in ['train', 'val', 'test', 'all']
+    
     target_sample_rate = dataset_kwargs['target_sample_rate']
     chunks_len_sec = dataset_kwargs['chunks_len_sec']
     training = dataset_kwargs['training']
     
-    if split == 'train':
+    if set_ == 'train':
         folds = list(range(0, 14))
-    elif split == 'val':
+    elif set_ == 'val':
         folds = [14, 15, 16]
-    elif split == 'test':
+    elif set_ == 'test':
         folds = [17, 18, 19]
-    else:
-        raise ValueError
+    elif set_ == 'all':
+        folds = list(range(0,20))
             
     if not training:
         avg_n_samples_signal = 661794       # Adjust this!!!
         num_chunks = (avg_n_samples_signal / target_sample_rate) / chunks_len_sec
         batch_size = math.floor(batch_size / num_chunks)
         
-
-
     dataset = GTZANDataset(folds=folds, 
-                           split=split, 
                            mel_spectrogram_kwargs=mel_spectrogram_params, 
                            **dataset_kwargs,
                            )
@@ -233,8 +229,6 @@ def create_data_loader(split='train', batch_size=128, mel_spectrogram_params=Non
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
     return dataloader, dataset
 
-
-            
 
 #%%
 def main():
@@ -249,7 +243,7 @@ def main():
     mel_spectrogram_params = {'n_fft': config.melspec_fft,
                               'hop_length': config.melspec_hop_length,
                               'n_mels': config.melspec_n_mels}
-    dataloader, dataset = create_data_loader(split='train',
+    dataloader, dataset = create_data_loader(set_='train',
                                              batch_size=config.batch_size,
                                              mel_spectrogram_params=mel_spectrogram_params,
                                              path_annotations_file=path_annotation_original,
