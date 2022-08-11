@@ -95,8 +95,9 @@ def load_experiment(experiment_name, return_embeddings=False, device='cpu'):
     path_params = get_path_experiment(experiment_name, file_type='json')
     
     state_dict = torch.load(path_best_model)
-    model = CNNNetwork(return_embeddings=return_embeddings).to(device)
+    model = CNNNetwork(return_embeddings=return_embeddings)
     model.load_state_dict(state_dict)
+    model = model.to(device)
     
     with open(path_params) as json_file:
         params = json.load(json_file)
