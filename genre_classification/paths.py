@@ -18,7 +18,6 @@ path_genre_to_class_map = os.path.join(project_root_path, 'data', 'interim', 'ge
 
 
 # Experiment
-experiment_name = 'trial'
 path_training_experiments = os.path.join(project_root_path, 'models', 'experiments')
 
 def get_path_experiment(experiment_name, file_type, overwrite_existing_experiment=True):

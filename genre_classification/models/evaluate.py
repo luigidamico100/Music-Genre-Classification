@@ -16,14 +16,9 @@ from genre_classification.paths import (
     path_annotation_original, 
     path_class_to_genre_map,
     path_genre_to_class_map,
-    experiment_name, 
     get_path_experiment
     )
-from genre_classification.models.config import (
-    device,
-    batch_size,
-    sample_rate,
-)
+from genre_classification.models import config
 import json
 from sklearn.metrics import accuracy_score, confusion_matrix, f1_score
 
@@ -95,7 +90,7 @@ def get_experiment_name(experiment_name):
     
     return experiment_name
 
-def load_experiment(experiment_name, return_embeddings=False):
+def load_experiment(experiment_name, return_embeddings=False, device='cpu'):
     path_best_model = get_path_experiment(experiment_name, file_type='best_model')
     path_params = get_path_experiment(experiment_name, file_type='json')
     
@@ -111,45 +106,53 @@ def load_experiment(experiment_name, return_embeddings=False):
     
 #%%
 
-def main(experiment_name):
+def main(config):
 
-    experiment_name = get_experiment_name(experiment_name)
-    cnn, params = load_experiment(experiment_name)
+    experiment_name = get_experiment_name(config.experiment_name)
+    cnn, params = load_experiment(experiment_name, device=config.device)
     
     n_examples = params['n_examples']
     chunks_len_sec = params['chunks_len_sec']
     
     
+    mel_spectrogram_params = {'n_fft': config.melspec_fft,
+                              'hop_length': config.melspec_hop_length,
+                              'n_mels': config.melspec_n_mels}
+    
     val_dataloader, val_dataset = create_data_loader(split='val',
-                                                     batch_size=batch_size,
-                                                     path_annotations_file=path_annotation_original,
-                                                     path_class_to_genre_map=path_class_to_genre_map,
-                                                     path_genre_to_class_map=path_genre_to_class_map,
-                                                     training=False,
-                                                     n_examples=n_examples,
-                                                     target_sample_rate=sample_rate,
-                                                     chunks_len_sec=chunks_len_sec,
-                                                     device=device,)
+                                             batch_size=config.batch_size,
+                                             mel_spectrogram_params=mel_spectrogram_params,
+                                             path_annotations_file=path_annotation_original,
+                                             path_class_to_genre_map=path_class_to_genre_map,
+                                             path_genre_to_class_map=path_genre_to_class_map,
+                                             training=False,
+                                             n_examples=n_examples,
+                                             target_sample_rate=config.sample_rate,
+                                             chunks_len_sec=chunks_len_sec,
+                                             device=config.device,)
     
     test_dataloader, test_dataset = create_data_loader(split='test',
-                                                     batch_size=batch_size,
-                                                     path_annotations_file=path_annotation_original,
-                                                     path_class_to_genre_map=path_class_to_genre_map,
-                                                     path_genre_to_class_map=path_genre_to_class_map,
-                                                     training=False,
-                                                     n_examples=n_examples,
-                                                     target_sample_rate=sample_rate,
-                                                     chunks_len_sec=chunks_len_sec,
-                                                     device=device,)  
-    metrics_val = evaluate(cnn, val_dataloader, device)
+                                             batch_size=config.batch_size,
+                                             mel_spectrogram_params=mel_spectrogram_params,
+                                             path_annotations_file=path_annotation_original,
+                                             path_class_to_genre_map=path_class_to_genre_map,
+                                             path_genre_to_class_map=path_genre_to_class_map,
+                                             training=False,
+                                             n_examples=n_examples,
+                                             target_sample_rate=config.sample_rate,
+                                             chunks_len_sec=chunks_len_sec,
+                                             device=config.device,)
     
-    metrics_test = evaluate(cnn, test_dataloader, device)
+
+    metrics_val = evaluate(cnn, val_dataloader, config.device)
+    
+    metrics_test = evaluate(cnn, test_dataloader, config.device)
     
     save_evaluation_data(metrics_val, val_dataset.genres, experiment_name, set_='val')
     save_evaluation_data(metrics_test, test_dataset.genres, experiment_name, set_='test')
     
     
 if __name__=='__main__':
-    main(experiment_name)
+    main(config)
 
 

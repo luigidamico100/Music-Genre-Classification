@@ -8,7 +8,6 @@ import matplotlib.pyplot as plt
 import argparse
 import seaborn as sns
 import pandas as pd
-import os
 import time
 from genre_classification.models.cnn import CNNNetwork
 from genre_classification.models.dataset import create_data_loader
@@ -16,18 +15,9 @@ from genre_classification.paths import (
     path_annotation_original, 
     path_class_to_genre_map,
     path_genre_to_class_map,
-    experiment_name, 
     get_path_experiment
     )
-from genre_classification.models.config import (
-    device,
-    batch_size,
-    epochs,
-    learning_rate,
-    sample_rate,
-    chunks_len_sec,
-    train_debug_mode,
-)
+from genre_classification.models import config
 import json
 from genre_classification.models.config import MyLogger
 
@@ -153,14 +143,14 @@ def save_training_data(df_training_history, params, model, mylogger):
         json.dump(params, outfile)
     
 
-def get_params(train_debug_mode, experiment_name, epochs, learning_rate, chunks_len_sec):
+def get_params(config):
     parser = argparse.ArgumentParser(description='Training process')
-    parser.add_argument('--epochs', type=int, help='epochs number', default=epochs)
+    parser.add_argument('--epochs', type=int, help='epochs number', default=config.epochs)
     # parser.add_argument('--train_debug_mode', type=bool, help='Train debug mode', default=train_debug_mode, action=argparse.BooleanOptionalAction)
-    parser.add_argument('--train_debug_mode', type=str, help='Train debug mode', default=train_debug_mode)
-    parser.add_argument('--learning_rate', type=float, help='training learning rate', default=learning_rate)
-    parser.add_argument('--experiment_name', type=str, help='experiment name', default=experiment_name)
-    parser.add_argument('--chunks_len_sec', type=float, help='Chunks length (sec)', default=chunks_len_sec)
+    parser.add_argument('--train_debug_mode', type=str, help='Train debug mode', default=config.train_debug_mode)
+    parser.add_argument('--learning_rate', type=float, help='training learning rate', default=config.learning_rate)
+    parser.add_argument('--experiment_name', type=str, help='experiment name', default=config.experiment_name)
+    parser.add_argument('--chunks_len_sec', type=float, help='Chunks length (sec)', default=config.chunks_len_sec)
     args = parser.parse_args()
     train_debug_mode = args.train_debug_mode == 'True'
     learning_rate = args.learning_rate
@@ -192,12 +182,10 @@ def get_params(train_debug_mode, experiment_name, epochs, learning_rate, chunks_
     
 #%%
 
-def main(train_debug_mode, experiment_name, epochs, learning_rate, chunks_len_sec):
+def main(config):
     
-    params = get_params(train_debug_mode, experiment_name, epochs, learning_rate, chunks_len_sec)
-    train_debug_mode = params['train_debug_mode']
+    params = get_params(config)
     n_examples = params['n_examples']
-    experiment_name = params['experiment_name']
     epochs = params['epochs']
     learning_rate = params['learning_rate']
     chunks_len_sec = params['chunks_len_sec']
@@ -206,31 +194,37 @@ def main(train_debug_mode, experiment_name, epochs, learning_rate, chunks_len_se
     mylogger.write(str(params))
          
     #save_params(train_debug_mode, n_examples, experiment_name, epochs, learning_rate, chunks_len_sec)
-
+    
+    mel_spectrogram_params = {'n_fft': config.melspec_fft,
+                              'hop_length': config.melspec_hop_length,
+                              'n_mels': config.melspec_n_mels}
+    
     train_dataloader, train_dataset = create_data_loader(split='train',
-                                                     batch_size=batch_size,
-                                                     path_annotations_file=path_annotation_original,
-                                                     path_class_to_genre_map=path_class_to_genre_map,
-                                                     path_genre_to_class_map=path_genre_to_class_map,
-                                                     training=True,
-                                                     n_examples=n_examples,
-                                                     target_sample_rate=sample_rate,
-                                                     chunks_len_sec=chunks_len_sec,
-                                                     device=device,)
-
+                                             batch_size=config.batch_size,
+                                             mel_spectrogram_params=mel_spectrogram_params,
+                                             path_annotations_file=path_annotation_original,
+                                             path_class_to_genre_map=path_class_to_genre_map,
+                                             path_genre_to_class_map=path_genre_to_class_map,
+                                             training=True,
+                                             n_examples=n_examples,
+                                             target_sample_rate=config.sample_rate,
+                                             chunks_len_sec=chunks_len_sec,
+                                             device=config.device,)
+    
     val_dataloader, val_dataset = create_data_loader(split='val',
-                                                     batch_size=batch_size,
-                                                     path_annotations_file=path_annotation_original,
-                                                     path_class_to_genre_map=path_class_to_genre_map,
-                                                     path_genre_to_class_map=path_genre_to_class_map,
-                                                     training=False,
-                                                     n_examples=n_examples,
-                                                     target_sample_rate=sample_rate,
-                                                     chunks_len_sec=chunks_len_sec,
-                                                     device=device,)
+                                             batch_size=config.batch_size,
+                                             mel_spectrogram_params=mel_spectrogram_params,
+                                             path_annotations_file=path_annotation_original,
+                                             path_class_to_genre_map=path_class_to_genre_map,
+                                             path_genre_to_class_map=path_genre_to_class_map,
+                                             training=False,
+                                             n_examples=n_examples,
+                                             target_sample_rate=config.sample_rate,
+                                             chunks_len_sec=chunks_len_sec,
+                                             device=config.device,)
 
     # construct model and assign it to device
-    cnn = CNNNetwork().to(device)
+    cnn = CNNNetwork().to(config.device)
     mylogger.write(cnn.__str__())
     summary(cnn, (1, 64, 603))
 
@@ -245,7 +239,7 @@ def main(train_debug_mode, experiment_name, epochs, learning_rate, chunks_len_se
                                          val_dataloader=val_dataloader,
                                          loss_fn=loss_fn,
                                          optimiser=optimiser,
-                                         device=device,
+                                         device=config.device,
                                          epochs=epochs,
                                          mylogger=mylogger)
 
@@ -253,4 +247,4 @@ def main(train_debug_mode, experiment_name, epochs, learning_rate, chunks_len_se
 
 
 if __name__ == "__main__":
-    main(train_debug_mode, experiment_name, epochs, learning_rate, chunks_len_sec)
+    main(config)

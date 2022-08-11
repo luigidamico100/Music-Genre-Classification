@@ -34,7 +34,8 @@ class GTZANDataset(Dataset):
                  training=True,
                  chunks_len_sec=7.,
                  verbose_sample_wasting=False,
-                 return_wav_filename=False):
+                 return_wav_filename=False,
+                 mel_spectrogram_kwargs=None):
 
         self.annotations = pd.read_csv(path_annotations_file, index_col=0)
         with open(path_class_to_genre_map, 'rb') as f:
@@ -59,11 +60,8 @@ class GTZANDataset(Dataset):
         
         self.mel_spectrogram = torchaudio.transforms.MelSpectrogram(
             sample_rate=target_sample_rate,
-            n_fft=1024,
-            hop_length=512,
-            n_mels=64,
-            normalized=False
-        ).to(device)
+            normalized=False,
+            **mel_spectrogram_kwargs,).to(device)
         self.amplitude_to_db = torchaudio.transforms.AmplitudeToDB().to(device)
         self.return_wav_filename = return_wav_filename
 
@@ -205,7 +203,7 @@ class GTZANDataset(Dataset):
 #                        verbose_sample_wasting=False,
 #                        return_wav_filename=False):
     
-def create_data_loader(split='train', batch_size=128, **dataset_kwargs):
+def create_data_loader(split='train', batch_size=128, mel_spectrogram_params=None, **dataset_kwargs):
     target_sample_rate = dataset_kwargs['target_sample_rate']
     chunks_len_sec = dataset_kwargs['chunks_len_sec']
     training = dataset_kwargs['training']
@@ -226,7 +224,11 @@ def create_data_loader(split='train', batch_size=128, **dataset_kwargs):
         
 
 
-    dataset = GTZANDataset(folds=folds, split=split, **dataset_kwargs)
+    dataset = GTZANDataset(folds=folds, 
+                           split=split, 
+                           mel_spectrogram_kwargs=mel_spectrogram_params, 
+                           **dataset_kwargs,
+                           )
 
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
     return dataloader, dataset
@@ -242,24 +244,22 @@ def main():
         path_class_to_genre_map,
         path_genre_to_class_map,
     )
-    from genre_classification.models.config import (
-        device,
-        batch_size,
-        sample_rate,
-        chunks_len_sec,
-    )
+    from genre_classification.models import config
 
-
-    dataloader, dataset = create_data_loader(split='val',
-                                             batch_size=batch_size,
+    mel_spectrogram_params = {'n_fft': config.melspec_fft,
+                              'hop_length': config.melspec_hop_length,
+                              'n_mels': config.melspec_n_mels}
+    dataloader, dataset = create_data_loader(split='train',
+                                             batch_size=config.batch_size,
+                                             mel_spectrogram_params=mel_spectrogram_params,
                                              path_annotations_file=path_annotation_original,
                                              path_class_to_genre_map=path_class_to_genre_map,
                                              path_genre_to_class_map=path_genre_to_class_map,
                                              training=True,
                                              n_examples='all',
-                                             target_sample_rate=sample_rate,
-                                             chunks_len_sec=chunks_len_sec,
-                                             device=device,)
+                                             target_sample_rate=config.sample_rate,
+                                             chunks_len_sec=config.chunks_len_sec,
+                                             device=config.device,)
 
     dataloader_it = iter(dataloader)
     dataloader_out = next(dataloader_it)
