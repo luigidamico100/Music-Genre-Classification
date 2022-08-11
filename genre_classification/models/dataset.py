@@ -31,6 +31,7 @@ class GTZANDataset(Dataset):
                  device=None,
                  folds=[0, 1, 2, 3, 4, 5],
                  split='train',
+                 training=True,
                  chunks_len_sec=7.,
                  verbose_sample_wasting=False,
                  return_wav_filename=False):
@@ -47,7 +48,7 @@ class GTZANDataset(Dataset):
             self.annotations = self.annotations.sample(n_examples, random_state=42)
         assert split in ['train', 'val', 'test']
         self.split = split
-        self.training = split=='train'
+        self.training = training
         self.device = device
         self.target_sample_rate = target_sample_rate
         self.num_samples = int(self.target_sample_rate * chunks_len_sec)
@@ -71,11 +72,11 @@ class GTZANDataset(Dataset):
 
     def __getitem__(self, idx):
         '''
-        self.split == 'train'
+        self.training == True
             return torch.Tensor of shape (f, t).
                 f = n_fft
                 t = (self.num_samples) / hop_length
-        self.split == 'val' or 'test'
+        self.training == False
             return torch.Tensor of shape (c, f, t)
         
         c = n chunks
@@ -207,19 +208,22 @@ class GTZANDataset(Dataset):
 def create_data_loader(split='train', batch_size=128, **dataset_kwargs):
     target_sample_rate = dataset_kwargs['target_sample_rate']
     chunks_len_sec = dataset_kwargs['chunks_len_sec']
+    training = dataset_kwargs['training']
     
     if split == 'train':
         folds = list(range(0, 14))
+    elif split == 'val':
+        folds = [14, 15, 16]
+    elif split == 'test':
+        folds = [17, 18, 19]
     else:
+        raise ValueError
+            
+    if not training:
         avg_n_samples_signal = 661794       # Adjust this!!!
         num_chunks = (avg_n_samples_signal / target_sample_rate) / chunks_len_sec
         batch_size = math.floor(batch_size / num_chunks)
-        if split == 'val':
-            folds = [14, 15, 16]
-        elif split == 'test':
-            folds = [17, 18, 19]
-        else:
-            raise ValueError
+        
 
 
     dataset = GTZANDataset(folds=folds, split=split, **dataset_kwargs)
@@ -251,6 +255,7 @@ def main():
                                              path_annotations_file=path_annotation_original,
                                              path_class_to_genre_map=path_class_to_genre_map,
                                              path_genre_to_class_map=path_genre_to_class_map,
+                                             training=True,
                                              n_examples='all',
                                              target_sample_rate=sample_rate,
                                              chunks_len_sec=chunks_len_sec,
