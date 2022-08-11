@@ -33,7 +33,7 @@ class MyLogger:
         
     def write(self, text):
         print(text)
-        self.text += '\n\n' + text
+        self.text += text + '\n\n'
         
     def write_on_file(self, filename):
         with open(filename, 'w') as f:
