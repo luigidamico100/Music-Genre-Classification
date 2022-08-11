@@ -13,6 +13,9 @@ path_raw_features_30_sec = os.path.join(project_root_path, 'data', 'raw', 'featu
 
 # Annotation dataframe
 path_annotation_original = os.path.join(project_root_path, 'data', 'interim', 'annotation.csv')
+path_class_to_genre_map = os.path.join(project_root_path, 'data', 'interim', 'class_to_genre_map.pkl')
+path_genre_to_class_map = os.path.join(project_root_path, 'data', 'interim', 'genre_to_class_map.pkl')
+
 
 # Experiment
 experiment_name = 'trial'

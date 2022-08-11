@@ -12,7 +12,13 @@ import argparse
 import pandas as pd
 from genre_classification.models.cnn import CNNNetwork
 from genre_classification.models.dataset import create_data_loader
-from genre_classification.paths import path_annotation_original, experiment_name, get_path_experiment
+from genre_classification.paths import (
+    path_annotation_original, 
+    path_class_to_genre_map,
+    path_genre_to_class_map,
+    experiment_name, 
+    get_path_experiment
+    )
 from genre_classification.models.config import (
     device,
     batch_size,
@@ -93,7 +99,6 @@ def load_experiment(experiment_name, return_embeddings=False):
     path_best_model = get_path_experiment(experiment_name, file_type='best_model')
     path_params = get_path_experiment(experiment_name, file_type='json')
     
-    
     state_dict = torch.load(path_best_model)
     model = CNNNetwork(return_embeddings=return_embeddings).to(device)
     model.load_state_dict(state_dict)
@@ -116,6 +121,8 @@ def main(experiment_name):
     
     
     val_dataloader, val_dataset = create_data_loader(path_annotation_original,
+                                                     path_class_to_genre_map,
+                                                     path_genre_to_class_map,
                                                      n_examples=n_examples,
                                                      target_sample_rate=sample_rate,
                                                      chunks_len_sec=chunks_len_sec,
@@ -124,12 +131,14 @@ def main(experiment_name):
                                                      split='val')
     
     test_dataloader, test_dataset = create_data_loader(path_annotation_original,
-                                                     n_examples=n_examples,
-                                                     target_sample_rate=sample_rate,
-                                                     chunks_len_sec=chunks_len_sec,
-                                                     device=device,
-                                                     batch_size=batch_size,
-                                                     split='test')    
+                                                       path_class_to_genre_map,
+                                                       path_genre_to_class_map,
+                                                        n_examples=n_examples,
+                                                        target_sample_rate=sample_rate,
+                                                        chunks_len_sec=chunks_len_sec,
+                                                        device=device,
+                                                        batch_size=batch_size,
+                                                        split='test')    
     metrics_val = evaluate(cnn, val_dataloader, device)
     
     metrics_test = evaluate(cnn, test_dataloader, device)

@@ -12,7 +12,13 @@ import os
 import time
 from genre_classification.models.cnn import CNNNetwork
 from genre_classification.models.dataset import create_data_loader
-from genre_classification.paths import path_annotation_original, experiment_name, get_path_experiment
+from genre_classification.paths import (
+    path_annotation_original, 
+    path_class_to_genre_map,
+    path_genre_to_class_map,
+    experiment_name, 
+    get_path_experiment
+    )
 from genre_classification.models.config import (
     device,
     batch_size,
@@ -202,6 +208,8 @@ def main(train_debug_mode, experiment_name, epochs, learning_rate, chunks_len_se
     #save_params(train_debug_mode, n_examples, experiment_name, epochs, learning_rate, chunks_len_sec)
 
     train_dataloader, train_dataset = create_data_loader(path_annotation_original,
+                                                         path_class_to_genre_map,
+                                                         path_genre_to_class_map,
                                                          n_examples=n_examples,
                                                          target_sample_rate=sample_rate,
                                                          chunks_len_sec=chunks_len_sec,
@@ -210,6 +218,8 @@ def main(train_debug_mode, experiment_name, epochs, learning_rate, chunks_len_se
                                                          split='train')
 
     val_dataloader, val_dataset = create_data_loader(path_annotation_original,
+                                                     path_class_to_genre_map,
+                                                     path_genre_to_class_map,
                                                      n_examples=n_examples,
                                                      target_sample_rate=sample_rate,
                                                      chunks_len_sec=chunks_len_sec,

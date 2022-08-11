@@ -2,17 +2,22 @@ from genre_classification.paths import (
     path_raw_wav_original,
     path_raw_images_original,
     path_annotation_original,
+    path_genre_to_class_map,
+    path_class_to_genre_map,
 )
 import os
 import pandas as pd
 from sklearn.model_selection import StratifiedKFold
+import pickle
 
 
 def create_df_annotation(path_orig):
     list_dict = []
+    genres = []
     for genre in os.listdir(path_orig):
         if genre == '.DS_Store':
             continue
+        genres.append(genre)
         genre_fullpath = os.path.join(path_orig, genre)
         for filename in os.listdir(genre_fullpath):
             if filename == '.DS_Store':
@@ -22,7 +27,13 @@ def create_df_annotation(path_orig):
             list_dict.append(dict_sample)
 
     df_annotation = pd.DataFrame(list_dict)
-    return df_annotation
+    return df_annotation, genres
+
+
+def create_class_genre_maps(genres):
+    genre_to_class_map = {genre: idx for idx, genre in enumerate(genres)}
+    class_to_genre_map = {genre_to_class_map[genre]: genre for genre in genre_to_class_map}
+    return class_to_genre_map, genre_to_class_map
 
 
 def merge_annotations(df_annotation_wav, df_annotation_images):
@@ -71,16 +82,25 @@ def add_fold_column(df_annotation, val_size=.2, test_size=.2):
 
 
 def main():
-    df_annotation_wav = create_df_annotation(path_raw_wav_original)
-    df_annotation_images = create_df_annotation(path_raw_images_original)
+    df_annotation_wav, genres = create_df_annotation(path_raw_wav_original)
+    df_annotation_images, _ = create_df_annotation(path_raw_images_original)
+    class_to_genre_map, genre_to_class_map = create_class_genre_maps(genres)
     df_annotation = merge_annotations(df_annotation_wav, df_annotation_images)
     df_annotation = add_fold_column(df_annotation)
 
     # jazz.00054.wav file cannot be opened
     df_annotation = df_annotation[df_annotation['wav_filename'] != 'jazz.00054.wav']
 
-    print(f'Writing annotation files to: {path_annotation_original}')
+    print(f'Writing df_annotation to: {path_annotation_original}')
     df_annotation.to_csv(path_annotation_original)
+    
+    print(f'Writing genre_to_class_map to {path_genre_to_class_map}')
+    with open(path_genre_to_class_map, 'wb') as outfile:
+        pickle.dump(genre_to_class_map, outfile)
+        
+    print(f'Writing class_to_genre_map to {path_class_to_genre_map}')
+    with open(path_class_to_genre_map, 'wb') as outfile:
+        pickle.dump(class_to_genre_map, outfile)
 
 
 if __name__ == '__main__':

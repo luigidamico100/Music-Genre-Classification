@@ -3,6 +3,7 @@ import pandas as pd
 import torchaudio
 import torch
 import random
+import pickle
 import math
 from torchaudio_augmentations import (
     RandomResizedCrop,
@@ -22,7 +23,9 @@ from torchaudio_augmentations import (
 class GTZANDataset(Dataset):
 
     def __init__(self,
-                 annotations_file_path,
+                 path_annotations_file,
+                 path_class_to_genre_map,
+                 path_genre_to_class_map,
                  n_examples='all',
                  target_sample_rate=None,
                  device=None,
@@ -32,8 +35,13 @@ class GTZANDataset(Dataset):
                  verbose_sample_wasting=False,
                  return_wav_filename=False):
 
-        self.annotations = pd.read_csv(annotations_file_path, index_col=0)
-        self.genres = list(self.annotations['genre'].unique())
+        self.annotations = pd.read_csv(path_annotations_file, index_col=0)
+        with open(path_class_to_genre_map, 'rb') as f:
+            self.class_to_genre_map = pickle.load(f)
+        with open(path_genre_to_class_map, 'rb') as f:
+            self.genre_to_class_map = pickle.load(f)
+        
+        self.genres = list(self.genre_to_class_map.keys())
         self.annotations = self.annotations[self.annotations['fold'].isin(folds)]
         if n_examples!='all':
             self.annotations = self.annotations.sample(n_examples, random_state=42)
@@ -44,8 +52,6 @@ class GTZANDataset(Dataset):
         self.target_sample_rate = target_sample_rate
         self.num_samples = int(self.target_sample_rate * chunks_len_sec)
         #self.transformation = transformation.to(device)
-        self.genre_to_class = {genre: idx for idx, genre in enumerate(self.genres)}
-        self.class_to_genre = {self.genre_to_class[genre]: genre for genre in self.genre_to_class}
         self.verbose_sample_wasting = verbose_sample_wasting
         if self.training:
             self._get_augmentations()
@@ -80,7 +86,7 @@ class GTZANDataset(Dataset):
         '''
         sample_path = self.annotations.iloc[idx]['wav_path']
         genre = self.annotations.iloc[idx]['genre']
-        label = self.genre_to_class[genre]
+        label = self.genre_to_class_map[genre]
         signal, sr = torchaudio.load(sample_path)
         signal = signal.to(self.device)
         signal = self.resample(signal, sr)
@@ -187,6 +193,8 @@ class GTZANDataset(Dataset):
 
 
 def create_data_loader(path_annotation_original,
+                       path_class_to_genre_map,
+                       path_genre_to_class_map,
                        n_examples=None,
                        target_sample_rate=None,
                        chunks_len_sec=7.,
@@ -211,6 +219,8 @@ def create_data_loader(path_annotation_original,
 
 
     dataset = GTZANDataset(path_annotation_original,
+                           path_class_to_genre_map,
+                           path_genre_to_class_map,
                            n_examples=n_examples,
                            target_sample_rate=target_sample_rate,
                            chunks_len_sec=chunks_len_sec,
@@ -230,7 +240,11 @@ def create_data_loader(path_annotation_original,
 
 if __name__ == "__main__":
     import numpy as np
-    from genre_classification.paths import path_annotation_original
+    from genre_classification.paths import (
+        path_annotation_original,
+        path_class_to_genre_map,
+        path_genre_to_class_map,
+    )
     from genre_classification.models.config import (
         device,
         batch_size,
@@ -240,6 +254,8 @@ if __name__ == "__main__":
 
 
     dataloader, dataset = create_data_loader(path_annotation_original,
+                                             path_class_to_genre_map,
+                                             path_genre_to_class_map,
                                              n_examples='all',
                                              target_sample_rate=sample_rate,
                                              chunks_len_sec=chunks_len_sec,
