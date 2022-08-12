@@ -163,7 +163,7 @@ def main(config):
                               'hop_length': config.melspec_hop_length,
                               'n_mels': config.melspec_n_mels}
     
-    train_dataloader, train_dataset = create_data_loader(split='train',
+    train_dataloader, train_dataset = create_data_loader(set_='train',
                                              batch_size=config.batch_size,
                                              mel_spectrogram_params=mel_spectrogram_params,
                                              path_annotations_file=path_annotation_original,
@@ -175,7 +175,7 @@ def main(config):
                                              chunks_len_sec=chunks_len_sec,
                                              device=config.device,)
     
-    val_dataloader, val_dataset = create_data_loader(split='val',
+    val_dataloader, val_dataset = create_data_loader(set_='val',
                                              batch_size=config.batch_size,
                                              mel_spectrogram_params=mel_spectrogram_params,
                                              path_annotations_file=path_annotation_original,
