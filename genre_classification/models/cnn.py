@@ -78,7 +78,17 @@ class CNNNetwork(nn.Module):
             nn.MaxPool2d(kernel_size=2)
         )
         self.flatten = nn.Flatten()
-        self.linear = nn.Linear(128, 10)
+        self.linear1 = nn.Sequenntial(
+            nn.Linear(128, 64),
+            nn.ReLU()
+            )
+        self.linear2 = nn.Sequential(
+            nn.Linear(64, 32),
+            nn.ReLU()
+            )
+        self.linear3 = nn.Sequential(
+            nn.Linear(32, 10),
+            )
         self.softmax = nn.Softmax(dim=1)
 
     def forward(self, input_data):
@@ -87,44 +97,24 @@ class CNNNetwork(nn.Module):
 
         '''
         x = input_data
-        if self.print_forward_tensors_shape:
-            print(x.shape)
+
         x = x.unsqueeze(1) # (b, f, t) -> (b, c=1, f, t)
-        if self.print_forward_tensors_shape:
-            print(x.shape)
         x = self.batch_normalization(x)
-        if self.print_forward_tensors_shape:
-            print(x.shape)
         x = self.conv1(x)
-        if self.print_forward_tensors_shape:
-            print(x.shape)
         x = self.conv2(x)
-        if self.print_forward_tensors_shape:
-            print(x.shape)
         x = self.conv3(x)
-        if self.print_forward_tensors_shape:
-            print(x.shape)
         x = self.conv4(x)
-        if self.print_forward_tensors_shape:
-            print(x.shape)
         # x = self.conv5(x)
-        # if self.print_forward_tensors_shape:
-        #     print(x.shape)
-        #     print('--- end of conv layers ---')
         x = F.max_pool2d(x, kernel_size=x.shape[2:])
-        if self.print_forward_tensors_shape:
-            print(x.shape)
         x = self.flatten(x)     # (b, c=128, f=1, t=1) -> (b, c)
         if self.print_forward_tensors_shape:
             print(x.shape)
         if self.return_embeddings:
             return x
-        logits = self.linear(x)
-        if self.print_forward_tensors_shape:
-            print(logits.shape)
+        x = self.linear1(x)
+        x = self.linear2(x)
+        logits = self.linear3(x)
         predictions = self.softmax(logits)
-        if self.print_forward_tensors_shape:
-            print(predictions.shape)
         return predictions
 
 
