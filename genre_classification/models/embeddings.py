@@ -21,14 +21,12 @@ from genre_classification.models.evaluate import load_experiment
 
 
 def get_embeddings(model, dataloader, device, class_to_genre_map):
-    print(next(model.parameters()).is_cuda)
     model.eval()
     embeddings_overall = torch.empty((0,)).to(device)
     target_overall = torch.empty((0,)).to(device)
     wav_filename_overall = np.empty(0,)
     with torch.no_grad():
         for input, target, wav_filename in dataloader:
-            print(input.is_cuda)
             input, target = input.to(device), target.to(device)
             b, c, f, t = input.shape  # batchs, chunks, freq., time
             input = input.view(-1, f, t)    # (b, c, f, t) -> (b*c, f, t)
@@ -74,7 +72,7 @@ def main(config):
     print(parsed_params)
     experiment_name = parsed_params['experiment_name']
     set_ = parsed_params['set']
-    cnn, params = load_experiment(experiment_name, return_embeddings=True)
+    cnn, params = load_experiment(experiment_name, return_embeddings=True, device=config.device)
     
     n_examples = params['n_examples']
     chunks_len_sec = params['chunks_len_sec']
