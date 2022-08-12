@@ -1,6 +1,5 @@
 import os
 from pathlib import Path
-import torch
 
 ################################################### Paths #################################################
 project_root_path = os.path.dirname(Path(os.path.abspath(__file__)).parent)
@@ -12,9 +11,9 @@ path_raw_features_3_sec = os.path.join(project_root_path, 'data', 'raw', 'featur
 path_raw_features_30_sec = os.path.join(project_root_path, 'data', 'raw', 'features_30_sec.csv')
 
 # Annotation dataframe
-path_annotation_original = os.path.join(project_root_path, 'data', 'interim', 'annotation.csv')
-path_class_to_genre_map = os.path.join(project_root_path, 'data', 'interim', 'class_to_genre_map.pkl')
-path_genre_to_class_map = os.path.join(project_root_path, 'data', 'interim', 'genre_to_class_map.pkl')
+path_annotations = os.path.join(project_root_path, 'data', 'processed', 'annotation.csv')
+path_class_to_genre_map = os.path.join(project_root_path, 'data', 'processed', 'class_to_genre_map.pkl')
+path_genre_to_class_map = os.path.join(project_root_path, 'data', 'processed', 'genre_to_class_map.pkl')
 
 
 # Experiment

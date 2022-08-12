@@ -234,7 +234,7 @@ def create_data_loader(set_='train', batch_size=128, mel_spectrogram_params=None
 def main():
     import numpy as np
     from genre_classification.paths import (
-        path_annotation_original,
+        path_annotations,
         path_class_to_genre_map,
         path_genre_to_class_map,
     )
@@ -246,7 +246,7 @@ def main():
     dataloader, dataset = create_data_loader(set_='train',
                                              batch_size=config.batch_size,
                                              mel_spectrogram_params=mel_spectrogram_params,
-                                             path_annotations_file=path_annotation_original,
+                                             path_annotations_file=path_annotations,
                                              path_class_to_genre_map=path_class_to_genre_map,
                                              path_genre_to_class_map=path_genre_to_class_map,
                                              training=True,

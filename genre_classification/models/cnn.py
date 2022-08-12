@@ -78,7 +78,7 @@ class CNNNetwork(nn.Module):
             nn.MaxPool2d(kernel_size=2)
         )
         self.flatten = nn.Flatten()
-        self.linear1 = nn.Sequenntial(
+        self.linear1 = nn.Sequential(
             nn.Linear(128, 64),
             nn.ReLU()
             )

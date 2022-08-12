@@ -1,7 +1,7 @@
 from genre_classification.paths import (
     path_raw_wav_original,
     path_raw_images_original,
-    path_annotation_original,
+    path_annotations,
     path_genre_to_class_map,
     path_class_to_genre_map,
 )
@@ -91,8 +91,8 @@ def main():
     # jazz.00054.wav file cannot be opened
     df_annotation = df_annotation[df_annotation['wav_filename'] != 'jazz.00054.wav']
 
-    print(f'Writing df_annotation to: {path_annotation_original}')
-    df_annotation.to_csv(path_annotation_original)
+    print(f'Writing df_annotation to: {path_annotations}')
+    df_annotation.to_csv(path_annotations)
     
     print(f'Writing genre_to_class_map to {path_genre_to_class_map}')
     with open(path_genre_to_class_map, 'wb') as outfile:

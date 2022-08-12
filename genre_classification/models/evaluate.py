@@ -8,12 +8,11 @@ Created on Sun Aug  7 23:43:09 2022
 
 import torch
 import numpy as np
-import argparse
 import pandas as pd
 from genre_classification.models.cnn import CNNNetwork
 from genre_classification.models.dataset import create_data_loader
 from genre_classification.paths import (
-    path_annotation_original, 
+    path_annotations, 
     path_class_to_genre_map,
     path_genre_to_class_map,
     get_path_experiment
@@ -117,7 +116,7 @@ def main(config):
     dataloader, dataset = create_data_loader(set_=set_,
                                              batch_size=config.batch_size,
                                              mel_spectrogram_params=mel_spectrogram_params,
-                                             path_annotations_file=path_annotation_original,
+                                             path_annotations_file=path_annotations,
                                              path_class_to_genre_map=path_class_to_genre_map,
                                              path_genre_to_class_map=path_genre_to_class_map,
                                              training=False,
