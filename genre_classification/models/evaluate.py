@@ -81,15 +81,6 @@ def save_evaluation_data(metrics, genres, experiment_name, set_='val'):
     print()
     
 
-def get_experiment_name(experiment_name):
-    parser = argparse.ArgumentParser(description='Evaluate process')
-    parser.add_argument('--experiment_name', type=str, help='experiment name', default=experiment_name)
-    args = parser.parse_args()
-    
-    experiment_name = args.experiment_name
-    
-    return experiment_name
-
 def load_experiment(experiment_name, return_embeddings=False, device='cpu'):
     path_best_model = get_path_experiment(experiment_name, file_type='best_model')
     path_params = get_path_experiment(experiment_name, file_type='json')

@@ -4,6 +4,7 @@ import argparse
 device = "cuda" if torch.cuda.is_available() else "cpu"
 print(f"Using device {device}")
 
+# ---------------------------- Editable params: -----------------------------#
 
 experiment_name = 'trial'
 
@@ -26,6 +27,8 @@ melspec_n_mels = 64
 
 # Evaluation params
 set_ = 'val'
+
+# --------------------------------------------------------------------------- #
 
 
 # Reproducibility

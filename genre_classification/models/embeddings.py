@@ -17,7 +17,7 @@ from genre_classification.paths import (
     get_path_experiment
     )
 from genre_classification.models import config
-from genre_classification.models.evaluate import load_experiment, get_experiment_name
+from genre_classification.models.evaluate import load_experiment
 
 
 def get_embeddings(model, dataloader, device, class_to_genre_map):
