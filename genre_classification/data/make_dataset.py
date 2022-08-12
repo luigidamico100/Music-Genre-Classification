@@ -72,7 +72,7 @@ def add_fold_column(df_annotation, val_size=.2, test_size=.2):
     X = df_annotation.drop('genre', axis=1)
     y = df_annotation['genre']
 
-    skf = StratifiedKFold(n_splits=20, shuffle=True)
+    skf = StratifiedKFold(n_splits=20, shuffle=True, random_state=42)
     df_annotation['fold'] = -1
 
     for fold, (train_idxs, test_idxs) in enumerate(skf.split(X, y)):
