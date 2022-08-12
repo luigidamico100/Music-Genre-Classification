@@ -148,14 +148,14 @@ def save_training_data(df_training_history, params, model, mylogger):
 
 def main(config):
     
-    params = config.parse_params(config, reason='training')
-    n_examples = params['n_examples']
-    epochs = params['epochs']
-    learning_rate = params['learning_rate']
-    chunks_len_sec = params['chunks_len_sec']
+    parsed_params = config.parse_params(config, reason='training')
+    n_examples = parsed_params['n_examples']
+    epochs = parsed_params['epochs']
+    learning_rate = parsed_params['learning_rate']
+    chunks_len_sec = parsed_params['chunks_len_sec']
     
     mylogger = MyLogger()
-    mylogger.write(str(params))
+    mylogger.write(str(parsed_params))
          
     #save_params(train_debug_mode, n_examples, experiment_name, epochs, learning_rate, chunks_len_sec)
     
@@ -207,7 +207,7 @@ def main(config):
                                          epochs=epochs,
                                          mylogger=mylogger)
 
-    save_training_data(df_training_history, params=params, model=best_model, mylogger=mylogger)
+    save_training_data(df_training_history, params=parsed_params, model=best_model, mylogger=mylogger)
 
 
 if __name__ == "__main__":

@@ -101,6 +101,7 @@ def load_experiment(experiment_name, return_embeddings=False, device='cpu'):
 def main(config):
 
     parsed_params = config.parse_params(config, reason='evaluate')
+    print(parsed_params)
     experiment_name = parsed_params['experiment_name']
     set_ = parsed_params['set']
     cnn, params = load_experiment(experiment_name, device=config.device)
