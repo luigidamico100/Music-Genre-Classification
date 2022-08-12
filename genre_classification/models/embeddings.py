@@ -21,7 +21,7 @@ from genre_classification.models.evaluate import load_experiment
 
 
 def get_embeddings(model, dataloader, device, class_to_genre_map):
-    next(model.parameters()).is_cuda
+    print(next(model.parameters()).is_cuda)
     model.eval()
     embeddings_overall = torch.empty((0,)).to(device)
     target_overall = torch.empty((0,)).to(device)
