@@ -79,18 +79,18 @@ class CNNNetwork(nn.Module):
         )
         self.flatten = nn.Flatten()
         self.linear = nn.Linear(128, 10)
-        self.linear1 = nn.Sequential(
-            nn.Linear(128, 64),
-            nn.ReLU()
-            )
-        self.linear2 = nn.Sequential(
-            nn.Linear(64, 32),
-            nn.ReLU()
-            )
-        self.linear3 = nn.Sequential(
-            nn.Linear(32, 10),
-            )
-        self.softmax = nn.Softmax(dim=1)
+        # self.linear1 = nn.Sequential(
+        #     nn.Linear(128, 64),
+        #     nn.ReLU()
+        #     )
+        # self.linear2 = nn.Sequential(
+        #     nn.Linear(64, 32),
+        #     nn.ReLU()
+        #     )
+        # self.linear3 = nn.Sequential(
+        #     nn.Linear(32, 10),
+        #     )
+        # self.softmax = nn.Softmax(dim=1)
 
     def forward(self, input_data):
         '''
