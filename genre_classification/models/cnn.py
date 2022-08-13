@@ -78,18 +78,18 @@ class CNNNetwork(nn.Module):
             nn.MaxPool2d(kernel_size=2)
         )
         self.flatten = nn.Flatten()
-        self.linear = nn.Linear(128, 10)
-        # self.linear1 = nn.Sequential(
-        #     nn.Linear(128, 64),
-        #     nn.ReLU()
-        #     )
-        # self.linear2 = nn.Sequential(
-        #     nn.Linear(64, 32),
-        #     nn.ReLU()
-        #     )
-        # self.linear3 = nn.Sequential(
-        #     nn.Linear(32, 10),
-        #     )
+        # self.linear = nn.Linear(128, 10)
+        self.linear1 = nn.Sequential(
+            nn.Linear(128, 64),
+            nn.ReLU()
+            )
+        self.linear2 = nn.Sequential(
+            nn.Linear(64, 32),
+            nn.ReLU()
+            )
+        self.linear3 = nn.Sequential(
+            nn.Linear(32, 10),
+            )
         # self.softmax = nn.Softmax(dim=1)
 
     def forward(self, input_data):
@@ -112,10 +112,10 @@ class CNNNetwork(nn.Module):
             print(x.shape)
         if self.return_embeddings:
             return x
-        # x = self.linear1(x)
-        # x = self.linear2(x)
-        #logits = self.linear3(x)
-        logits = self.linear(x)
+        x = self.linear1(x)
+        x = self.linear2(x)
+        logits = self.linear3(x)
+        # logits = self.linear(x)
         #predictions = self.softmax(logits)
         return logits
 
