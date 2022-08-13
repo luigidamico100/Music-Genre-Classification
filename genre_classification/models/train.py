@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 import time
-from genre_classification.models.cnn import CNNNetwork
+from genre_classification.models.cnn import CNNNetwork, CNN_tutorial
 from genre_classification.models.dataset import create_data_loader
 from genre_classification.paths import (
     path_annotations, 
@@ -142,8 +142,6 @@ def save_training_data(df_training_history, params, model, mylogger):
         json.dump(params, outfile)
         
     
-    
-    
 #%%
 
 def main(config):
@@ -155,7 +153,10 @@ def main(config):
     chunks_len_sec = parsed_params['chunks_len_sec']
     
     mylogger = MyLogger()
+    
+    print('----- Params -----')
     mylogger.write(str(parsed_params))
+    print()
          
     #save_params(train_debug_mode, n_examples, experiment_name, epochs, learning_rate, chunks_len_sec)
     
@@ -186,11 +187,17 @@ def main(config):
                                              target_sample_rate=config.sample_rate,
                                              chunks_len_sec=chunks_len_sec,
                                              device=config.device,)
+    
+    print('----- Dataset tensor shapes -----')
+    print(f'train_dataset\t-> input shape: {train_dataset[0][0].shape}')
+    print(f'val_dataset  \t-> input shape: {val_dataset[0][0].shape}')
+    print()
 
     # construct model and assign it to device
-    cnn = CNNNetwork().to(config.device)
+    cnn = CNN_tutorial().to(config.device)
     mylogger.write(cnn.__str__())
-    summary(cnn, (1, 64, 603))
+    # print(summary(cnn, (2, 640, 603)))
+    # print(summary(cnn, (2, 64, 603)))
 
     # initialise loss function + optimiser
     loss_fn = nn.CrossEntropyLoss()
