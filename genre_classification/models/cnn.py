@@ -78,6 +78,7 @@ class CNNNetwork(nn.Module):
             nn.MaxPool2d(kernel_size=2)
         )
         self.flatten = nn.Flatten()
+        self.linear = nn.Linear(128, 10)
         self.linear1 = nn.Sequential(
             nn.Linear(128, 64),
             nn.ReLU()
@@ -111,11 +112,12 @@ class CNNNetwork(nn.Module):
             print(x.shape)
         if self.return_embeddings:
             return x
-        x = self.linear1(x)
-        x = self.linear2(x)
-        logits = self.linear3(x)
-        predictions = self.softmax(logits)
-        return predictions
+        # x = self.linear1(x)
+        # x = self.linear2(x)
+        #logits = self.linear3(x)
+        logits = self.linear(x)
+        #predictions = self.softmax(logits)
+        return logits
 
 
 if __name__ == "__main__":
