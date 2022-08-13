@@ -3,12 +3,115 @@ from torchinfo import summary
 import torch.nn.functional as F
 
 
+
+class Conv_2d(nn.Module):
+    def __init__(self, input_channels, output_channels, shape=3, pooling=2, dropout=0.1):
+        super(Conv_2d, self).__init__()
+        self.conv = nn.Conv2d(input_channels, output_channels, shape, padding=shape//2)
+        self.bn = nn.BatchNorm2d(output_channels)
+        self.relu = nn.ReLU()
+        self.maxpool = nn.MaxPool2d(pooling)
+        self.dropout = nn.Dropout(dropout)
+        
+    def forward(self, wav):
+        out = self.conv(wav)
+        out = self.bn(out)
+        out = self.relu(out)
+        out = self.maxpool(out)
+        out = self.dropout(out)
+        return out
+    
+    
+class CNNNetwork2(nn.Module):
+    
+    def __init__(self, num_channels=16, 
+                       sample_rate=22050, 
+                       n_fft=1024, 
+                       f_min=0.0, 
+                       f_max=11025.0, 
+                       num_mels=128, 
+                       num_classes=10):
+    
+        super(CNNNetwork2, self).__init__()
+        
+        self.layer1 = Conv_2d(1, num_channels, pooling=(2, 3))
+        self.layer2 = Conv_2d(num_channels, num_channels, pooling=(3, 4))
+        self.layer3 = Conv_2d(num_channels, num_channels * 2, pooling=(2, 5))
+        self.layer4 = Conv_2d(num_channels * 2, num_channels * 2, pooling=(3, 3))
+        self.layer5 = Conv_2d(num_channels * 2, num_channels * 4, pooling=(3, 4))
+        
+        self.dense1 = nn.Sequential(
+            nn.Linear(num_channels*4, num_channels))
+        
+        self.dense1 = nn.Linear(num_channels * 4, num_channels * 4)
+        self.dense_bn = nn.BatchNorm1d(num_channels * 4)
+        self.dense2 = nn.Linear(num_channels * 4, num_classes)
+        self.dropout = nn.Dropout(0.5)
+        self.relu = nn.ReLU()
+        
+        
+        
+class CNN_tutorial(nn.Module):
+    def __init__(self, num_channels=16, 
+                       sample_rate=22050, 
+                       n_fft=1024, 
+                       f_min=0.0, 
+                       f_max=11025.0, 
+                       num_mels=128, 
+                       num_classes=10):
+        super(CNN_tutorial, self).__init__()
+
+        self.input_bn = nn.BatchNorm2d(1)
+
+        # convolutional layers
+        self.layer1 = Conv_2d(1, num_channels, pooling=(2, 3))
+        self.layer2 = Conv_2d(num_channels, num_channels, pooling=(3, 4))
+        self.layer3 = Conv_2d(num_channels, num_channels * 2, pooling=(2, 5))
+        self.layer4 = Conv_2d(num_channels * 2, num_channels * 2, pooling=(3, 3))
+        self.layer5 = Conv_2d(num_channels * 2, num_channels * 4, pooling=(3, 4))
+
+        # dense layers
+        self.dense1 = nn.Linear(num_channels * 4, num_channels * 4)
+        self.dense_bn = nn.BatchNorm1d(num_channels * 4)
+        self.dense2 = nn.Linear(num_channels * 4, num_classes)
+        self.dropout = nn.Dropout(0.5)
+        self.relu = nn.ReLU()
+
+    def forward(self, input_data):
+        
+        x = input_data
+
+        # input batch normalization
+        x = x.unsqueeze(1)
+        x = self.input_bn(x)
+
+        # convolutional layers
+        x = self.layer1(x)
+        x = self.layer2(x)
+        x = self.layer3(x)
+        x = self.layer4(x)
+        x = self.layer5(x)
+        x = F.max_pool2d(x, kernel_size=x.shape[2:])
+        # reshape. (batch_size, num_channels, 1, 1) -> (batch_size, num_channels)
+        x = x.reshape(len(x), -1)
+
+        # dense layers
+        x = self.dense1(x)
+        x = self.dense_bn(x)
+        x = self.relu(x)
+        x = self.dropout(x)
+        x = self.dense2(x)
+
+        return x
+    
+
+
+
 class CNNNetwork(nn.Module):
 
-    def __init__(self, return_embeddings=False, print_forward_tensors_shape=False):
+    def __init__(self, return_embeddings=False):
         # TODO: Insert batch normalization between conv e relu
         super().__init__()
-        self.print_forward_tensors_shape = print_forward_tensors_shape
         
         self.return_embeddings = return_embeddings
 
@@ -108,8 +211,6 @@ class CNNNetwork(nn.Module):
         # x = self.conv5(x)
         x = F.max_pool2d(x, kernel_size=x.shape[2:])
         x = self.flatten(x)     # (b, c=128, f=1, t=1) -> (b, c)
-        if self.print_forward_tensors_shape:
-            print(x.shape)
         if self.return_embeddings:
             return x
         x = self.linear1(x)
@@ -122,10 +223,12 @@ class CNNNetwork(nn.Module):
 
 if __name__ == "__main__":
     from genre_classification.models.config import device
-    cnn = CNNNetwork(print_forward_tensors_shape=True, return_embeddings=True).to(device)
-    summary(cnn, (1, 64, 44))
-
     import torch
-    input_tensor = torch.rand(1, 1, 20, 20)
-    summary(cnn, (1, 400, 400))
+    
+    cnn = CNN_tutorial().to(device)
+    # print(summary(cnn, (1, 64, 603)))
 
+    # summary(cnn, (1, 400, 400))
+
+    a = torch.rand(2, 1000, 1000)
+    cnn(a)
