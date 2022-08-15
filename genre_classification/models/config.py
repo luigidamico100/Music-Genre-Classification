@@ -22,7 +22,7 @@ chunks_len_sec = 14.
 
 # Mel spectrogram params
 melspec_fft = 1024
-melspec_hop_length = 256 #512
+melspec_hop_length = 512
 melspec_n_mels = 128 #64
 
 # Evaluation params

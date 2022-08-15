@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 import time
-from genre_classification.models.cnn import CNNNetwork, CNN_tutorial
+from genre_classification.models.cnn import CNNNetwork, CNN_tutorial, CNNNetwork_my
 from genre_classification.models.dataset import create_data_loader
 from genre_classification.paths import (
     path_annotations, 
@@ -194,10 +194,10 @@ def main(config):
     print()
 
     # construct model and assign it to device
-    cnn = CNN_tutorial().to(config.device)
-    mylogger.write(cnn.__str__())
-    # print(summary(cnn, (2, 640, 603)))
-    # print(summary(cnn, (2, 64, 603)))
+    cnn = CNNNetwork_my().to(config.device)
+    mylogger.write(str(cnn))
+    input_size_example = (config.batch_size, train_dataset[0][0].size(0), train_dataset[0][0].size(1))
+    mylogger.write(str(summary(cnn, input_size_example)))
 
     # initialise loss function + optimiser
     loss_fn = nn.CrossEntropyLoss()
