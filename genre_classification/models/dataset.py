@@ -166,40 +166,7 @@ class GTZANDataset(Dataset):
         signal = torch.mean(signal, dim=0, keepdim=False)
         return signal
 
-    # def cut_old(self, signal):
-    #     length_signal = signal.shape[1]
-    #     if length_signal > self.num_samples:
-    #         signal = signal[:self.num_samples]
-    #     return signal
 
-    # def cut(self, signal):
-    #     length_signal = len(signal)
-    #     if length_signal > self.num_samples:
-    #         random_index = random.randint(0, length_signal - self.num_samples - 1)
-    #         signal = signal[random_index:random_index + self.num_samples]
-    #     return signal
-
-    # def right_pad(self, signal):
-    #     length_signal = len(signal)
-    #     if length_signal < self.num_samples:
-    #         num_missing_samples = self.num_samples - length_signal
-    #         last_dim_padding = (0, num_missing_samples)
-    #         signal = torch.nn.functional.pad(signal, last_dim_padding)
-    #     return signal
-
-
-# def create_data_loader(path_annotation_original,
-#                        path_class_to_genre_map,
-#                        path_genre_to_class_map,
-#                        n_examples=None,
-#                        target_sample_rate=None,
-#                        chunks_len_sec=7.,
-#                        device='cpu',
-#                        batch_size=64,
-#                        split='train',
-#                        verbose_sample_wasting=False,
-#                        return_wav_filename=False):
-    
 def create_data_loader(set_='train', batch_size=128, mel_spectrogram_params=None, **dataset_kwargs):
     assert set_ in ['train', 'val', 'test', 'all']
     
