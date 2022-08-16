@@ -151,6 +151,8 @@ def main(config):
     epochs = parsed_params['epochs']
     learning_rate = parsed_params['learning_rate']
     chunks_len_sec = parsed_params['chunks_len_sec']
+    batch_size = parsed_params['batch_size']
+    dropout = parsed_params['dropout']
     
     mylogger = MyLogger()
     
@@ -165,7 +167,7 @@ def main(config):
                               'n_mels': config.melspec_n_mels}
     
     train_dataloader, train_dataset = create_data_loader(set_='train',
-                                             batch_size=config.batch_size,
+                                             batch_size=batch_size,
                                              mel_spectrogram_params=mel_spectrogram_params,
                                              path_annotations_file=path_annotations,
                                              path_class_to_genre_map=path_class_to_genre_map,
@@ -177,7 +179,7 @@ def main(config):
                                              device=config.device,)
     
     val_dataloader, val_dataset = create_data_loader(set_='val',
-                                             batch_size=config.batch_size,
+                                             batch_size=batch_size,
                                              mel_spectrogram_params=mel_spectrogram_params,
                                              path_annotations_file=path_annotations,
                                              path_class_to_genre_map=path_class_to_genre_map,
@@ -194,7 +196,7 @@ def main(config):
     print()
 
     # construct model and assign it to device
-    cnn = CNNNetwork_my().to(config.device)
+    cnn = CNNNetwork_my(dropout=dropout).to(config.device)
     mylogger.write(str(cnn))
     input_size_example = (config.batch_size, train_dataset[0][0].size(0), train_dataset[0][0].size(1))
     mylogger.write(str(summary(cnn, input_size_example)))

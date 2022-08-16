@@ -14,6 +14,9 @@ batch_size = 128
 epochs = 100
 learning_rate = 0.001
 
+# Model params
+dropout = 0.1
+
 # Signal processing params
 sample_rate = 22050
 chunks_len_sec = 14.
@@ -74,6 +77,8 @@ def parse_params(config, reason='training'):
         parser.add_argument('--melspec_fft', type=int, help='melspec fft', default=config.melspec_fft)
         parser.add_argument('--melspec_hop_length', type=float, help='melspec hop length', default=config.melspec_hop_length)
         parser.add_argument('--melspec_n_mels', type=float, help='melspec n mels', default=config.melspec_n_mels)
+        parser.add_argument('--dropout', type=float, help='model dropout rate', default=config.dropout)
+        
         
         args = parser.parse_args()
         train_debug_mode = args.train_debug_mode == 'True'
@@ -86,6 +91,7 @@ def parse_params(config, reason='training'):
         melspec_fft = args.melspec_fft
         melspec_hop_length = args.melspec_hop_length
         melspec_n_mels = args.melspec_n_mels
+        dropout = args.dropout
         
         params['train_debug_mode'] = train_debug_mode
         params['n_examples'] = n_examples
@@ -97,6 +103,7 @@ def parse_params(config, reason='training'):
         params['melspec_fft'] = melspec_fft
         params['melspec_hop_length'] = melspec_hop_length
         params['melspec_n_mels'] = melspec_n_mels
+        params['dropout'] = dropout
         
         return params
     

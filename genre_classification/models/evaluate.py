@@ -80,12 +80,16 @@ def save_evaluation_data(metrics, genres, experiment_name, set_='val'):
     print()
     
 
-def load_experiment(experiment_name, return_embeddings=False, device='cpu'):
+def load_experiment(parsed_params, return_embeddings=False, device='cpu'):
+    
+    experiment_name = parsed_params['experiment_name']
+    dropout = parsed_params['dropout']
+    
     path_best_model = get_path_experiment(experiment_name, file_type='best_model')
     path_params = get_path_experiment(experiment_name, file_type='json')
     
     state_dict = torch.load(path_best_model)
-    model = CNNNetwork(return_embeddings=return_embeddings)
+    model = CNNNetwork(return_embeddings=return_embeddings, dropout=dropout)
     model.load_state_dict(state_dict)
     model = model.to(device)
     
@@ -103,7 +107,7 @@ def main(config):
     print(parsed_params)
     experiment_name = parsed_params['experiment_name']
     set_ = parsed_params['set']
-    cnn, params = load_experiment(experiment_name, device=config.device)
+    cnn, params = load_experiment(parsed_params, device=config.device)
     
     n_examples = params['n_examples']
     chunks_len_sec = params['chunks_len_sec']

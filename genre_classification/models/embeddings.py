@@ -72,7 +72,7 @@ def main(config):
     print(parsed_params)
     experiment_name = parsed_params['experiment_name']
     set_ = parsed_params['set']
-    cnn, params = load_experiment(experiment_name, return_embeddings=True, device=config.device)
+    cnn, params = load_experiment(parsed_params, return_embeddings=True, device=config.device)
     
     n_examples = params['n_examples']
     chunks_len_sec = params['chunks_len_sec']

@@ -5,7 +5,7 @@ import torch.nn.functional as F
 
 
 class Conv_2d(nn.Module):
-    def __init__(self, input_channels, output_channels, shape=3, pooling=2, dropout=0.05):
+    def __init__(self, input_channels, output_channels, shape=3, pooling=2, dropout=0.1):
         super(Conv_2d, self).__init__()
         self.conv = nn.Conv2d(input_channels, output_channels, shape, padding=shape//2)
         self.bn = nn.BatchNorm2d(output_channels)
@@ -23,35 +23,35 @@ class Conv_2d(nn.Module):
     
     
 class Linear(nn.Module):
-    def __init__(self, in_features, out_features, dropout=0.1, relu_activation=True):
+    def __init__(self, in_features, out_features, dropout=.1):
         super(Linear, self).__init__()
         self.linear = nn.Linear(in_features, out_features)
-        self.bn = nn.BatchNorm1d(out_features)
         self.relu = nn.ReLU()
-        self.relu_activation = relu_activation
+        self.dropout = nn.Dropout(dropout)
         
     def forward(self, input_data):
         x = self.linear(input_data)
-        if self.relu_activation:
-            x = self.relu(x)
+        x = self.relu(x)
+        x = self.dropout(x)
         return x
     
     
 class CNNNetwork_my(nn.Module):
     
     def __init__(self, num_channels=16, 
-                       num_classes=10):
+                       num_classes=10,
+                       dropout=0.1):
     
         super(CNNNetwork_my, self).__init__()
         
-        self.layer1 = Conv_2d(1, num_channels, pooling=(2, 3))
-        self.layer2 = Conv_2d(num_channels, num_channels * 2, pooling=(2, 3))
-        self.layer3 = Conv_2d(num_channels * 2, num_channels * 4, pooling=(2, 3))
-        self.layer4 = Conv_2d(num_channels * 4, num_channels * 8, pooling=(2, 3))
+        self.layer1 = Conv_2d(1, num_channels, pooling=(2, 3), dropout=dropout)
+        self.layer2 = Conv_2d(num_channels, num_channels * 2, pooling=(2, 3), dropout=dropout)
+        self.layer3 = Conv_2d(num_channels * 2, num_channels * 4, pooling=(2, 3), dropout=dropout)
+        self.layer4 = Conv_2d(num_channels * 4, num_channels * 8, pooling=(2, 3), dropout=dropout)
         
         self.flatten = nn.Flatten()
-        self.linear1 = Linear(num_channels*8, num_channels*4)
-        self.linear2 = Linear(num_channels*4, num_classes, relu_activation=False)
+        self.linear1 = Linear(num_channels*8, num_channels*4, dropout=dropout)
+        self.linear2 = nn.Linear(num_channels*4, num_classes)
         
         
     def forward(self, input_data):
