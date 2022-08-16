@@ -51,7 +51,7 @@ class CNNNetwork_my(nn.Module):
         
         self.flatten = nn.Flatten()
         self.linear1 = Linear(num_channels*8, num_channels*4)
-        self.linear2 = Linear(num_channels*4, num_classes, relu_layer=False)
+        self.linear2 = Linear(num_channels*4, num_classes, relu_activation=False)
         
         
     def forward(self, input_data):
@@ -67,7 +67,7 @@ class CNNNetwork_my(nn.Module):
         # x = x.reshape(len(x), -1)
         x = self.flatten(x)
         x = self.linear1(x)
-        x = self.linear2(x, relu_activation=False)
+        x = self.linear2(x)
         
         return x
     
