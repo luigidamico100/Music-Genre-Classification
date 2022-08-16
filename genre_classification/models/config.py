@@ -60,19 +60,19 @@ class MyLogger:
 
 def parse_params(config, reason='training'):
     
-    assert reason in ['training', 'evaluate']
+    assert reason in ['training', 'evaluate', 'inference']
     
     params = {}
     
     if reason=='training':
     
         parser = argparse.ArgumentParser(description='Training process')
+        parser.add_argument('--experiment_name', type=str, help='experiment name', default=config.experiment_name)
         parser.add_argument('--epochs', type=int, help='epochs number', default=config.epochs)
         # parser.add_argument('--train_debug_mode', type=bool, help='Train debug mode', default=train_debug_mode, action=argparse.BooleanOptionalAction)
         parser.add_argument('--train_debug_mode', type=str, help='Train debug mode', default=config.train_debug_mode)
         parser.add_argument('--batch_size', type=int, help='batch size', default=config.batch_size)
         parser.add_argument('--learning_rate', type=float, help='training learning rate', default=config.learning_rate)
-        parser.add_argument('--experiment_name', type=str, help='experiment name', default=config.experiment_name)
         parser.add_argument('--chunks_len_sec', type=float, help='Chunks length (sec)', default=config.chunks_len_sec)
         parser.add_argument('--melspec_fft', type=int, help='melspec fft', default=config.melspec_fft)
         parser.add_argument('--melspec_hop_length', type=float, help='melspec hop length', default=config.melspec_hop_length)
@@ -116,6 +116,11 @@ def parse_params(config, reason='training'):
         params['experiment_name'] = args.experiment_name
         params['set'] = args.set
         
+    elif reason=='inference':
+        parser = argparse.ArgumentParser(description='New .wav inference')
+        parser.add_argument('--experiment_name', type=str, help='Experiment name', default=config.experiment_name)
+        parser.add_argument('wav_path', type=str, help='wav patg', required=True)
+        args = parser.parse_args()
         
         return params
 
