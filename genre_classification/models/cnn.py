@@ -5,7 +5,7 @@ import torch.nn.functional as F
 
 
 class Conv_2d(nn.Module):
-    def __init__(self, input_channels, output_channels, shape=3, pooling=2, dropout=0.1):
+    def __init__(self, input_channels, output_channels, shape=3, pooling=2, dropout=0.05):
         super(Conv_2d, self).__init__()
         self.conv = nn.Conv2d(input_channels, output_channels, shape, padding=shape//2)
         self.bn = nn.BatchNorm2d(output_channels)
@@ -21,22 +21,20 @@ class Conv_2d(nn.Module):
         out = self.dropout(out)
         return out
     
+    
 class Linear(nn.Module):
-    def __init__(self, in_features, out_features, dropout=0.1, relu_layer=True):
+    def __init__(self, in_features, out_features, dropout=0.1, relu_activation=True):
         super(Linear, self).__init__()
         self.linear = nn.Linear(in_features, out_features)
         self.bn = nn.BatchNorm1d(out_features)
         self.relu = nn.ReLU()
-        self.relu_layer = relu_layer
+        self.relu_activation = relu_activation
         
     def forward(self, input_data):
         x = self.linear(input_data)
-        x = self.bn(x)
-        if self.relu_layer:
+        if self.relu_activation:
             x = self.relu(x)
         return x
-        
-        
     
     
 class CNNNetwork_my(nn.Module):
@@ -53,8 +51,7 @@ class CNNNetwork_my(nn.Module):
         
         self.flatten = nn.Flatten()
         self.linear1 = Linear(num_channels*8, num_channels*4)
-        self.linear2 = Linear(num_channels*4, num_channels*2)
-        self.linear3 = Linear(num_channels*2, num_classes, relu_layer=False)
+        self.linear2 = Linear(num_channels*4, num_classes, relu_layer=False)
         
         
     def forward(self, input_data):
@@ -70,8 +67,7 @@ class CNNNetwork_my(nn.Module):
         # x = x.reshape(len(x), -1)
         x = self.flatten(x)
         x = self.linear1(x)
-        x = self.linear2(x)
-        x = self.linear3(x)
+        x = self.linear2(x, relu_activation=False)
         
         return x
     
