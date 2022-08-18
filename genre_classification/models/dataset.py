@@ -102,7 +102,7 @@ def read_wav_and_preprocess(wav_file_path,
         
     signal = wav_to_spec_transformation(signal)
     
-    return signal, sr
+    return signal
 
 
 
@@ -167,7 +167,7 @@ class GTZANDataset(Dataset):
         genre = self.annotations.iloc[idx]['genre']
         label = self.genre_to_class_map[genre]
         
-        signal, sr = read_wav_and_preprocess(wav_file_path=sample_path,
+        signal = read_wav_and_preprocess(wav_file_path=sample_path,
                                              wav_to_spec_transformation=self.wav_to_spec_transformation,
                                              target_sample_rate=self.target_sample_rate,
                                              num_samples=self.num_samples,
@@ -200,6 +200,7 @@ def create_data_loader(set_='train', batch_size=128, mel_spectrogram_params=None
     target_sample_rate = dataset_kwargs['target_sample_rate']
     chunks_len_sec = dataset_kwargs['chunks_len_sec']
     training = dataset_kwargs['training']
+    device = dataset_kwargs['device']
     
     if set_ == 'train':
         folds = list(range(0, 14))
@@ -216,7 +217,7 @@ def create_data_loader(set_='train', batch_size=128, mel_spectrogram_params=None
         batch_size = math.floor(batch_size / num_chunks)
         
         
-    wav_to_spec_transformation = get_wav_to_spec_transformation(mel_spectrogram_params, dataset_kwargs['target_sample_rate'], dataset_kwargs['device'])
+    wav_to_spec_transformation = get_wav_to_spec_transformation(mel_spectrogram_params, target_sample_rate, device)
     
     dataset = GTZANDataset(folds=folds, 
                            wav_to_spec_transformation=wav_to_spec_transformation,
@@ -227,20 +228,29 @@ def create_data_loader(set_='train', batch_size=128, mel_spectrogram_params=None
     return dataloader, dataset
 
 
-def create_inference_data_loader(wav_file_path, mel_spectrogram_params=None, **dataset_kwargs):
-    target_sample_rate = dataset_kwargs['target_sample_rate']
-    chunks_len_sec = dataset_kwargs['chunks_len_sec']
-    training = dataset_kwargs['training']
+def get_preprocessed_wav(wav_file_path,
+                         path_class_to_genre_map,
+                         mel_spectrogram_params,
+                         target_sample_rate,
+                         chunks_len_sec,
+                         device='cpu',):
+    num_samples = int(target_sample_rate * chunks_len_sec)
+    
+    wav_to_spec_transformation = get_wav_to_spec_transformation(mel_spectrogram_params, target_sample_rate, device)
 
-    avg_n_samples_signal = 661794  # Adjust this!!!
-    num_chunks = (avg_n_samples_signal / target_sample_rate) / chunks_len_sec
-
-    dataset = GTZANDataset(mel_spectrogram_kwargs=mel_spectrogram_params,
-                           **dataset_kwargs,
-                           )
-    dataloader = DataLoader(dataset, batch_size=1)
-    return dataloader, dataset
-
+    signal = read_wav_and_preprocess(wav_file_path=wav_file_path,
+                            wav_to_spec_transformation=wav_to_spec_transformation,
+                            target_sample_rate=target_sample_rate,
+                            num_samples=num_samples,
+                            training=False,
+                            verbose_sample_wasting=True,
+                            device=device)
+    
+    with open(path_class_to_genre_map, 'rb') as f:
+        class_to_genre_map = pickle.load(f)
+    
+    return signal, class_to_genre_map
+    
 
 def main():
     import numpy as np
