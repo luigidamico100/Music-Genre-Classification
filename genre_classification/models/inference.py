@@ -9,14 +9,8 @@ Created on Tue Aug 16 17:25:22 2022
 import torch
 import numpy as np
 import pandas as pd
-from genre_classification.models.cnn import CNNNetwork
-from genre_classification.models.dataset import create_data_loader, get_preprocessed_wav
-from genre_classification.paths import (
-    path_annotations,
-    path_class_to_genre_map,
-    path_genre_to_class_map,
-    get_path_experiment
-)
+from genre_classification.paths import path_class_to_genre_map
+from genre_classification.models.dataset import get_preprocessed_wav
 from genre_classification.models import config
 from genre_classification.models.evaluate import load_experiment
 
@@ -28,8 +22,13 @@ def predict(model, signal_chunks, class_to_genre_map):
         # prediction = prediction.view(b, c, -1).mean(dim=1) # Check that
         prediction = prediction.mean(dim=0)
         predicted = torch.argmax(prediction)
+        
+    predicted_genre = class_to_genre_map[predicted.item()]
+    genres = list(class_to_genre_map.values())
+    df_prediction_proba = pd.DataFrame(index=genres, data=np.array(prediction), columns=['class_proba'])
+    df_prediction_proba = df_prediction_proba.sort_values(by='class_proba', ascending=False)
             
-    return class_to_genre_map[predicted.item()]
+    return predicted_genre, df_prediction_proba
             
 
 
@@ -65,6 +64,8 @@ cnn, params = load_experiment(parsed_params, device=config.device)
 chunks_len_sec = params['chunks_len_sec']
 
 
-predicted_genre = predict(cnn, signal_chunks, class_to_genre_map)
+predicted_genre, df_prediction_proba = predict(cnn, signal_chunks, class_to_genre_map)
 
 print(predicted_genre)
+print()
+print(df_prediction_proba)
