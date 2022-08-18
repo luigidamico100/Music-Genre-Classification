@@ -25,7 +25,7 @@ def predict(model, signal_chunks, class_to_genre_map):
         
     predicted_genre = class_to_genre_map[predicted.item()]
     genres = list(class_to_genre_map.values())
-    df_prediction_proba = pd.DataFrame(index=genres, data=np.array(prediction), columns=['class_proba'])
+    df_prediction_proba = pd.DataFrame(index=genres, data=np.array(prediction.cpu()), columns=['class_proba'])
     df_prediction_proba = df_prediction_proba.sort_values(by='class_proba', ascending=False)
             
     return predicted_genre, df_prediction_proba
