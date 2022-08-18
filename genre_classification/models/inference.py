@@ -8,11 +8,13 @@ Created on Tue Aug 16 17:25:22 2022
 
 import torch
 from torch.nn.functional import softmax
+import numpy as np
 import pandas as pd
 from genre_classification.paths import path_class_to_genre_map
 from genre_classification.models.dataset import get_preprocessed_wav
 from genre_classification.models import config
 from genre_classification.models.evaluate import load_experiment
+pd.set_option('display.precision', 2)
 
 
 def predict(model, signal_chunks, class_to_genre_map):
@@ -25,9 +27,15 @@ def predict(model, signal_chunks, class_to_genre_map):
         
     predicted_genre = class_to_genre_map[predicted.item()]
     genres = list(class_to_genre_map.values())
-    prediction_proba = softmax(prediction).cpu().numpy()
-    df_prediction_proba = pd.DataFrame(index=genres, data=prediction_proba, columns=['class_proba'])
+    prediction_proba = softmax(prediction, dim=0).cpu().numpy()
+    prediction_score = prediction.cpu().numpy()
+    df_prediction_proba = pd.DataFrame(index=genres, 
+                                       data=np.concatenate((prediction_proba, prediction_score)).reshape(-1, 2, order='F'), 
+                                       columns=['class_proba', 'prediction_score'])
     df_prediction_proba = df_prediction_proba.sort_values(by='class_proba', ascending=False)
+    df_prediction_proba['class_proba'] = df_prediction_proba['class_proba'] * 100.
+    df_prediction_proba['class_proba'] = df_prediction_proba['class_proba'].map('{:,.1f} %'.format)
+    # df_prediction_proba['prediction_score'] = df_prediction_proba['prediction_score'].map('{:,.3f}'.format)
             
     return predicted_genre, df_prediction_proba
             
