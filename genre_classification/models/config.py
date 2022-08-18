@@ -107,7 +107,7 @@ def parse_params(config, reason='training'):
         
         return params
     
-    elif reason=='evaluate':
+    elif reason == 'evaluate':
         parser = argparse.ArgumentParser(description='Evaluate process')
         parser.add_argument('--experiment_name', type=str, help='Experiment name', default=config.experiment_name)
         parser.add_argument('--set', type=str, help='Choose from (all, train, val, test)', default=config.set_)
@@ -115,12 +115,17 @@ def parse_params(config, reason='training'):
         
         params['experiment_name'] = args.experiment_name
         params['set'] = args.set
+
+        return params
         
-    elif reason=='inference':
+    elif reason == 'inference':
         parser = argparse.ArgumentParser(description='New .wav inference')
+        parser.add_argument('wav_path', type=str, help='wav patg')
         parser.add_argument('--experiment_name', type=str, help='Experiment name', default=config.experiment_name)
-        parser.add_argument('wav_path', type=str, help='wav patg', required=True)
         args = parser.parse_args()
+
+        params['wav_path'] = args.wav_path
+        params['experiment_name'] = args.experiment_name
         
         return params
 

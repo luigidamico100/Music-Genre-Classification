@@ -21,12 +21,12 @@ class Conv2d(nn.Module):
         :doc-author: Trelent
         """
         super(Conv2d, self).__init__()
-        self.conv = nn.Conv2d(input_channels, output_channels, shape, padding=shape//2)
+        self.conv = nn.Conv2d(input_channels, output_channels, shape, padding=shape // 2)
         self.bn = nn.BatchNorm2d(output_channels)
         self.relu = nn.ReLU()
         self.maxpool = nn.MaxPool2d(pooling)
         self.dropout = nn.Dropout(dropout)
-        
+
     def forward(self, input_data):
         out = self.conv(input_data)
         out = self.bn(out)
@@ -34,8 +34,8 @@ class Conv2d(nn.Module):
         out = self.maxpool(out)
         out = self.dropout(out)
         return out
-    
-    
+
+
 class Linear(nn.Module):
     def __init__(self, in_features, out_features, dropout=.1):
         """
@@ -53,46 +53,49 @@ class Linear(nn.Module):
         self.linear = nn.Linear(in_features, out_features)
         self.relu = nn.ReLU()
         self.dropout = nn.Dropout(dropout)
-        
+
     def forward(self, input_data):
         x = self.linear(input_data)
         x = self.relu(x)
         x = self.dropout(x)
         return x
-    
-    
-class MyCNNNetwork(nn.Module):
-    
-    def __init__(self, num_channels=16, 
-                       num_classes=10,
-                       dropout=0.1):
 
+
+class MyCNNNetwork(nn.Module):
+
+    def __init__(self,
+                 num_channels=16,
+                 num_classes=10,
+                 dropout=0.1,
+                 return_embeddings=False):
         super(MyCNNNetwork, self).__init__()
-        
+
         self.layer1 = Conv2d(1, num_channels, pooling=(2, 3), dropout=dropout)
         self.layer2 = Conv2d(num_channels, num_channels * 2, pooling=(2, 3), dropout=dropout)
         self.layer3 = Conv2d(num_channels * 2, num_channels * 4, pooling=(2, 3), dropout=dropout)
         self.layer4 = Conv2d(num_channels * 4, num_channels * 8, pooling=(2, 3), dropout=dropout)
-        
+
         self.flatten = nn.Flatten()
-        self.linear1 = Linear(num_channels*8, num_channels*4, dropout=dropout)
-        self.linear2 = nn.Linear(num_channels*4, num_classes)
+        self.linear1 = Linear(num_channels * 8, num_channels * 4, dropout=dropout)
+        self.linear2 = nn.Linear(num_channels * 4, num_classes)
+
+        self.return_embeddings = return_embeddings
 
     def forward(self, input_data):
         x = input_data
-        x = x.unsqueeze(1) # (b, f, t) -> (b, c=1, f, t)
+        x = x.unsqueeze(1)  # (b, f, t) -> (b, c=1, f, t)
         x = self.layer1(x)
         x = self.layer2(x)
         x = self.layer3(x)
         x = self.layer4(x)
-        # (b, c, f, t) -> (b, c, 1, 1)
-        x = F.max_pool2d(x, kernel_size=x.shape[2:])
-        # (b, c, 1, 1) -> (b, c)
+        x = F.max_pool2d(x, kernel_size=x.shape[2:])  # (b, c, f, t) -> (b, c, 1, 1)
         # x = x.reshape(len(x), -1)
-        x = self.flatten(x)
+        x = self.flatten(x)  # (b, c, 1, 1) -> (b, c)
+        if self.return_embeddings:
+            return x
         x = self.linear1(x)
         x = self.linear2(x)
-        
+
         return x
 
 
@@ -111,7 +114,7 @@ class CNNNetwork(nn.Module):
         """
         # TODO: Insert batch normalization between conv e relu
         super().__init__()
-        
+
         self.return_embeddings = return_embeddings
 
         self.batch_normalization = nn.BatchNorm2d(1)
@@ -184,14 +187,14 @@ class CNNNetwork(nn.Module):
         self.linear1 = nn.Sequential(
             nn.Linear(128, 64),
             nn.ReLU()
-            )
+        )
         self.linear2 = nn.Sequential(
             nn.Linear(64, 32),
             nn.ReLU()
-            )
+        )
         self.linear3 = nn.Sequential(
             nn.Linear(32, 10),
-            )
+        )
         # self.softmax = nn.Softmax(dim=1)
 
     def forward(self, input_data):
@@ -207,21 +210,21 @@ class CNNNetwork(nn.Module):
         x = self.conv4(x)
         # x = self.conv5(x)
         x = F.max_pool2d(x, kernel_size=x.shape[2:])
-        x = self.flatten(x)     # (b, c=128, f=1, t=1) -> (b, c)
+        x = self.flatten(x)  # (b, c=128, f=1, t=1) -> (b, c)
         if self.return_embeddings:
             return x
         x = self.linear1(x)
         x = self.linear2(x)
         logits = self.linear3(x)
         # logits = self.linear(x)
-        #predictions = self.softmax(logits)
+        # predictions = self.softmax(logits)
         return logits
 
 
 if __name__ == "__main__":
     from genre_classification.models.config import device
     import torch
-    
+
     cnn = MyCNNNetwork().to(device)
     # print(summary(cnn, (1, 64, 603)))
 

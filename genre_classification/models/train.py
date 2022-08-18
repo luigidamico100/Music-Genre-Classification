@@ -190,47 +190,40 @@ def save_training_data(df_training_history, params, model, mylogger):
 def main(config):
     
     parsed_params = config.parse_params(config, reason='training')
-    n_examples = parsed_params['n_examples']
-    epochs = parsed_params['epochs']
-    learning_rate = parsed_params['learning_rate']
-    chunks_len_sec = parsed_params['chunks_len_sec']
-    batch_size = parsed_params['batch_size']
-    dropout = parsed_params['dropout']
-    
     mylogger = MyLogger()
     
-    print('----- Params -----')
+    print('----- Parsed params -----')
     mylogger.write(str(parsed_params))
     print()
          
     #save_params(train_debug_mode, n_examples, experiment_name, epochs, learning_rate, chunks_len_sec)
     
-    mel_spectrogram_params = {'n_fft': config.melspec_fft,
-                              'hop_length': config.melspec_hop_length,
-                              'n_mels': config.melspec_n_mels}
+    mel_spectrogram_params = {'n_fft': parsed_params['melspec_fft'],
+                              'hop_length': parsed_params['melspec_hop_length'],
+                              'n_mels': parsed_params['melspec_n_mels']}
     
     train_dataloader, train_dataset = create_data_loader(set_='train',
-                                             batch_size=batch_size,
+                                             batch_size=parsed_params['batch_size'],
                                              mel_spectrogram_params=mel_spectrogram_params,
                                              path_annotations_file=path_annotations,
                                              path_class_to_genre_map=path_class_to_genre_map,
                                              path_genre_to_class_map=path_genre_to_class_map,
                                              training=True,
-                                             n_examples=n_examples,
+                                             n_examples=parsed_params['n_examples'],
                                              target_sample_rate=config.sample_rate,
-                                             chunks_len_sec=chunks_len_sec,
+                                             chunks_len_sec=parsed_params['chunks_len_sec'],
                                              device=config.device,)
     
     val_dataloader, val_dataset = create_data_loader(set_='val',
-                                             batch_size=batch_size,
+                                             batch_size=parsed_params['batch_size'],
                                              mel_spectrogram_params=mel_spectrogram_params,
                                              path_annotations_file=path_annotations,
                                              path_class_to_genre_map=path_class_to_genre_map,
                                              path_genre_to_class_map=path_genre_to_class_map,
                                              training=False,
-                                             n_examples=n_examples,
+                                             n_examples=parsed_params['n_examples'],
                                              target_sample_rate=config.sample_rate,
-                                             chunks_len_sec=chunks_len_sec,
+                                             chunks_len_sec=parsed_params['chunks_len_sec'],
                                              device=config.device,)
     
     print('----- Dataset tensor shapes -----')
@@ -239,15 +232,15 @@ def main(config):
     print()
 
     # construct model and assign it to device
-    cnn = MyCNNNetwork(dropout=dropout).to(config.device)
+    cnn = MyCNNNetwork(dropout=parsed_params['dropout']).to(config.device)
     mylogger.write(str(cnn))
-    input_size_example = (config.batch_size, train_dataset[0][0].size(0), train_dataset[0][0].size(1))
+    input_size_example = (parsed_params['batch_size'], train_dataset[0][0].size(0), train_dataset[0][0].size(1))
     mylogger.write(str(summary(cnn, input_size_example)))
 
     # initialise loss function + optimiser
     loss_fn = nn.CrossEntropyLoss()
     optimiser = torch.optim.Adam(cnn.parameters(),
-                                 lr=learning_rate)
+                                 lr=parsed_params['learning_rate'])
 
     # train model
     df_training_history, best_model = train(model=cnn,
@@ -256,7 +249,7 @@ def main(config):
                                          loss_fn=loss_fn,
                                          optimiser=optimiser,
                                          device=config.device,
-                                         epochs=epochs,
+                                         epochs=parsed_params['epochs'],
                                          mylogger=mylogger)
 
     save_training_data(df_training_history, params=parsed_params, model=best_model, mylogger=mylogger)

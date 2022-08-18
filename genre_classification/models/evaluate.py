@@ -81,19 +81,16 @@ def save_evaluation_data(metrics, genres, experiment_name, set_='val'):
 
 def load_experiment(parsed_params, return_embeddings=False, device='cpu'):
     
-    experiment_name = parsed_params['experiment_name']
-    dropout = parsed_params['dropout']
-    
-    path_best_model = get_path_experiment(experiment_name, file_type='best_model')
-    path_params = get_path_experiment(experiment_name, file_type='json')
-    
-    state_dict = torch.load(path_best_model)
-    model = MyCNNNetwork(return_embeddings=return_embeddings, dropout=dropout)
-    model.load_state_dict(state_dict)
-    model = model.to(device)
-    
+    path_best_model = get_path_experiment(parsed_params['experiment_name'], file_type='best_model')
+    path_params = get_path_experiment(parsed_params['experiment_name'], file_type='json')
+
     with open(path_params) as json_file:
         params = json.load(json_file)
+    
+    state_dict = torch.load(path_best_model)
+    model = MyCNNNetwork(return_embeddings=return_embeddings, dropout=params['dropout'])
+    model.load_state_dict(state_dict)
+    model = model.to(device)
         
     return model, params
 
@@ -101,34 +98,33 @@ def load_experiment(parsed_params, return_embeddings=False, device='cpu'):
 def main(config):
 
     parsed_params = config.parse_params(config, reason='evaluate')
+    print('----- Parsed params -----')
     print(parsed_params)
-    experiment_name = parsed_params['experiment_name']
-    set_ = parsed_params['set']
+    print()
     cnn, params = load_experiment(parsed_params, device=config.device)
+    print('----- Params -----')
+    print(params)
+    print()
+
+    mel_spectrogram_params = {'n_fft': params['melspec_fft'],
+                              'hop_length': params['melspec_hop_length'],
+                              'n_mels': params['melspec_n_mels']}
     
-    n_examples = params['n_examples']
-    chunks_len_sec = params['chunks_len_sec']
-    
-    
-    mel_spectrogram_params = {'n_fft': config.melspec_fft,
-                              'hop_length': config.melspec_hop_length,
-                              'n_mels': config.melspec_n_mels}
-    
-    dataloader, dataset = create_data_loader(set_=set_,
-                                             batch_size=config.batch_size,
+    dataloader, dataset = create_data_loader(set_=parsed_params['set'],
+                                             batch_size=params['batch_size'],
                                              mel_spectrogram_params=mel_spectrogram_params,
                                              path_annotations_file=path_annotations,
                                              path_class_to_genre_map=path_class_to_genre_map,
                                              path_genre_to_class_map=path_genre_to_class_map,
                                              training=False,
-                                             n_examples=n_examples,
+                                             n_examples=params['n_examples'],
                                              target_sample_rate=config.sample_rate,
-                                             chunks_len_sec=chunks_len_sec,
+                                             chunks_len_sec=params['chunks_len_sec'],
                                              device=config.device,)
 
     metrics = evaluate(cnn, dataloader, config.device)
     
-    save_evaluation_data(metrics, dataset.genres, experiment_name, set_=set_)
+    save_evaluation_data(metrics, dataset.genres, parsed_params['experiment_name'], set_=parsed_params['set'])
     
     
 if __name__ == '__main__':
