@@ -7,7 +7,7 @@ Created on Tue Aug 16 17:25:22 2022
 """
 
 import torch
-import numpy as np
+from torch.nn.functional import softmax
 import pandas as pd
 from genre_classification.paths import path_class_to_genre_map
 from genre_classification.models.dataset import get_preprocessed_wav
@@ -25,7 +25,8 @@ def predict(model, signal_chunks, class_to_genre_map):
         
     predicted_genre = class_to_genre_map[predicted.item()]
     genres = list(class_to_genre_map.values())
-    df_prediction_proba = pd.DataFrame(index=genres, data=np.array(prediction.cpu()), columns=['class_proba'])
+    prediction_proba = softmax(prediction).cpu().numpy()
+    df_prediction_proba = pd.DataFrame(index=genres, data=prediction_proba, columns=['class_proba'])
     df_prediction_proba = df_prediction_proba.sort_values(by='class_proba', ascending=False)
             
     return predicted_genre, df_prediction_proba
