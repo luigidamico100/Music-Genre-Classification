@@ -38,8 +38,6 @@ print('----- Parsed params -----')
 print(parsed_params)
 print()
 
-parsed_params = {'experiment_name': 'trial'}
-
 cnn, params = load_experiment(parsed_params, device=config.device)
 print('----- Params -----')
 print(params)
