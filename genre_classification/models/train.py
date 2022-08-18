@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 import time
-from genre_classification.models.cnn import CNNNetwork, CNN_tutorial, CNNNetwork_my
+from genre_classification.models.cnn import CNNNetwork, MyCNNNetwork
 from genre_classification.models.dataset import create_data_loader
 from genre_classification.paths import (
     path_annotations, 
@@ -22,6 +22,19 @@ from genre_classification.models.config import MyLogger
 
 
 def train_single_epoch(model, dataloader, loss_fn, optimiser, device):
+    """
+    The train_single_epoch function trains the model for a single epoch.
+    It iterates through all batches in the dataloader and updates weights accordingly.
+    The function returns the average loss and accuracy of this epoch.
+
+    :param model: Pass the model that is being trained
+    :param dataloader: Iterate over the dataset
+    :param loss_fn: Calculate the loss of the model
+    :param optimiser: Update the weights of the model
+    :param device: Tell torch which device to use
+    :return: The overall loss and accuracy of the model on a single epoch
+    :doc-author: Trelent
+    """
     model.train()
     accuracy = Accuracy().to(device)
     losses = []
@@ -52,6 +65,21 @@ def train_single_epoch(model, dataloader, loss_fn, optimiser, device):
 
 
 def validate_single_epoch(model, dataloader, loss_fn, device):
+    """
+    The validate_single_epoch function is used to validate the model on a single epoch.
+    It takes as input:
+    - model: the model we want to validate (torch.nn.Module)
+    - dataloader: a torch DataLoader object containing our validation data (torch.utils.data)
+    - loss_fn: the loss function that calculates how far off predictions are from actual values (torch)  # noQA E501
+    - device: where we want to run our computations, either GPU or CPU (str). If 'GPU' then .cuda() will be called on the network and inputs; if
+
+    :param model: Specify the model that is used for training
+    :param dataloader: Obtain the data
+    :param loss_fn: Define the loss function used during training
+    :param device: Tell the network whether it should run on the cpu or gpu
+    :return: The loss and accuracy of the model on a given dataset
+    :doc-author: Trelent
+    """
     model.eval()
     accuracy = Accuracy().to(device)
     prediction_overall = torch.empty((0,)).to(device)
@@ -65,7 +93,6 @@ def validate_single_epoch(model, dataloader, loss_fn, device):
             prediction = model(input)
             prediction = prediction.view(b, c, -1).mean(dim=1) # Check that
             loss = loss_fn(prediction, target)
-
             _, predicted = torch.max(prediction.data, dim=1)
 
             prediction_overall = torch.cat((prediction_overall, predicted))
@@ -80,6 +107,23 @@ def validate_single_epoch(model, dataloader, loss_fn, device):
 
 
 def train(model, train_dataloader, val_dataloader, loss_fn, optimiser, device, epochs, mylogger):
+    """
+    The train function trains a model for a given number of epochs.
+    It returns the training and validation history as well as the best model found.
+
+
+    :param model: Specify the model to be trained
+    :param train_dataloader: Specify the training data
+    :param val_dataloader: Specify the validation data
+    :param loss_fn: Specify the loss function used for training
+    :param optimiser: Specify the optimiser used for training
+    :param device: Tell the model where to run
+    :param epochs: Specify the number of epochs to train for
+    :param mylogger: Save the training history in a csv file
+    :return: Two dataframes:
+    :doc-author: Trelent
+    """
+
     train_data = []
     val_data = []
     start_time = time.time()
@@ -111,6 +155,7 @@ def train(model, train_dataloader, val_dataloader, loss_fn, optimiser, device, e
 
 
 def save_training_data(df_training_history, params, model, mylogger):
+
     with sns.axes_style("darkgrid"):
         fig, axs = plt.subplots(2, 1)
         sns.lineplot(data=df_training_history, x=df_training_history.index, y='train_loss', label='train_loss', ax=axs[0])
@@ -141,8 +186,6 @@ def save_training_data(df_training_history, params, model, mylogger):
     with open(path_params, 'w') as outfile:
         json.dump(params, outfile)
         
-    
-#%%
 
 def main(config):
     
@@ -196,7 +239,7 @@ def main(config):
     print()
 
     # construct model and assign it to device
-    cnn = CNNNetwork_my(dropout=dropout).to(config.device)
+    cnn = MyCNNNetwork(dropout=dropout).to(config.device)
     mylogger.write(str(cnn))
     input_size_example = (config.batch_size, train_dataset[0][0].size(0), train_dataset[0][0].size(1))
     mylogger.write(str(summary(cnn, input_size_example)))

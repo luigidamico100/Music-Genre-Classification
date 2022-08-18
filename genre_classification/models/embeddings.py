@@ -21,6 +21,18 @@ from genre_classification.models.evaluate import load_experiment
 
 
 def get_embeddings(model, dataloader, device, class_to_genre_map):
+    """
+    The get_embeddings function returns two dataframes:
+        1. df_embeddings, which contains the embeddings for each track in the dataset.
+        2. df_genres, which contains the genre of each track in the dataset.
+
+    :param model: Specify which model should be used
+    :param dataloader: Load the data
+    :param device: Tell torch which device to use
+    :param class_to_genre_map: Map the classes to their respective genres
+    :return: Two dataframes:
+    :doc-author: Trelent
+    """
     model.eval()
     embeddings_overall = torch.empty((0,)).to(device)
     target_overall = torch.empty((0,)).to(device)
@@ -63,9 +75,6 @@ def save_embeddings_data(dfs, experiment_name, set_='val'):
     df_genres.to_csv(path_df_genres, index=False, sep='\t')
     print()
     
-    
-    
-#%%
 
 def main(config):
     parsed_params = config.parse_params(config, reason='evaluate')
@@ -96,12 +105,11 @@ def main(config):
                                              return_wav_filename=True)
     
     dfs = get_embeddings(cnn, dataloader, config.device, dataset.class_to_genre_map)
-    
-    
+
     save_embeddings_data(dfs, experiment_name, set_=set_)
     
     
-if __name__=='__main__':
+if __name__ == '__main__':
     main(config)
 
 

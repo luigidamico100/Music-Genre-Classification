@@ -12,6 +12,28 @@ import pickle
 
 
 def create_df_annotation(path_orig):
+    """
+    The create_df_annotation function creates a dataframe of the annotations for each song.
+    The function takes in one argument, which is the path to the original dataset.
+    It returns two objects: df_annotation and genres.
+    df_annotation is a pandas dataframe that contains three columns: genre, filename, and path.
+    genres is a list of all genres in our dataset.
+
+    :param path_orig: Specify the path to the folder containing all of the genre folders
+    :return: A dataframe with the following columns: genre, filename, and path
+    :doc-author: Trelent
+    """
+    """
+    The create_df_annotation function creates a dataframe of the annotations for each song.
+    The function takes in one argument, which is the path to the original dataset. 
+    It returns two objects: df_annotation and genres. 
+    df_annotation is a pandas dataframe that contains three columns: genre, filename, and path. 
+    genres is a list of all genres in our dataset.
+    
+    :param path_orig: Specify the path to the folder containing all of the genre folders
+    :return: A dataframe with the following columns:
+    :doc-author: Trelent
+    """
     list_dict = []
     genres = []
     for genre in os.listdir(path_orig):
@@ -37,6 +59,18 @@ def create_class_genre_maps(genres):
 
 
 def merge_annotations(df_annotation_wav, df_annotation_images):
+    """
+    The merge_annotations function takes in two dataframes: df_annotation_wav and df_annotation_images.
+    The first dataframe contains the annotations for the wav files, while the second contains annotations for
+    the images. The function then merges these two dataframes together based on their filenames, which are
+    extracted from each row of each respective dataframe. This is done to ensure that there is a one-to-one
+    correspondence between wav files and their associated images.
+
+    :param df_annotation_wav: Specify the dataframe containing the wav filenames and their paths
+    :param df_annotation_images: Find the image file associated with a wav file
+    :return: A dataframe with the following columns:
+    :doc-author: Trelent
+    """
     list_dict = []
 
     for idx, df_annotation_wav_row in df_annotation_wav.iterrows():

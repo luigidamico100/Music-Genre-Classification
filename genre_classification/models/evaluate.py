@@ -9,7 +9,7 @@ Created on Sun Aug  7 23:43:09 2022
 import torch
 import numpy as np
 import pandas as pd
-from genre_classification.models.cnn import CNNNetwork
+from genre_classification.models.cnn import MyCNNNetwork
 from genre_classification.models.dataset import create_data_loader
 from genre_classification.paths import (
     path_annotations, 
@@ -20,7 +20,6 @@ from genre_classification.paths import (
 from genre_classification.models import config
 import json
 from sklearn.metrics import accuracy_score, confusion_matrix, f1_score
-
 
 
 def evaluate(model, dataloader, device):
@@ -89,7 +88,7 @@ def load_experiment(parsed_params, return_embeddings=False, device='cpu'):
     path_params = get_path_experiment(experiment_name, file_type='json')
     
     state_dict = torch.load(path_best_model)
-    model = CNNNetwork(return_embeddings=return_embeddings, dropout=dropout)
+    model = MyCNNNetwork(return_embeddings=return_embeddings, dropout=dropout)
     model.load_state_dict(state_dict)
     model = model.to(device)
     
@@ -97,9 +96,7 @@ def load_experiment(parsed_params, return_embeddings=False, device='cpu'):
         params = json.load(json_file)
         
     return model, params
-    
-    
-#%%
+
 
 def main(config):
 
@@ -128,14 +125,13 @@ def main(config):
                                              target_sample_rate=config.sample_rate,
                                              chunks_len_sec=chunks_len_sec,
                                              device=config.device,)
-    
 
     metrics = evaluate(cnn, dataloader, config.device)
     
     save_evaluation_data(metrics, dataset.genres, experiment_name, set_=set_)
     
     
-if __name__=='__main__':
+if __name__ == '__main__':
     main(config)
 
 

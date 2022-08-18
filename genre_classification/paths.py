@@ -20,8 +20,27 @@ path_genre_to_class_map = os.path.join(project_root_path, 'data', 'processed', '
 path_training_experiments = os.path.join(project_root_path, 'models', 'experiments')
 
 def get_path_experiment(experiment_name, file_type, overwrite_existing_experiment=True):
-    
+    """
+    The get_path_experiment function returns the path to a file in an experiment folder.
+    The function takes as input:
+    - experiment_name (str): name of the experiment, e.g., 'experiment_0'
+    - file_type (str): type of file to be returned, e.g., 'df_training_history',
+                       'best model', etc...
+
+        The following strings are accepted:
+
+            - df training history: returns the path to a csv with information about each epoch during training; saved in /training/ folder; filename = df_training_history.csv
+            - best
+
+    :param experiment_name: Create a folder where to save the results of the experiment
+    :param file_type: Specify the type of file to be saved
+    :param overwrite_existing_experiment=True: Avoid errors when running the same experiment twice
+    :return: The path of the file, given the experiment name and file type
+    :doc-author: Trelent
+    """
     def create_dir(path, overwrite_existing_experiment=False):
+
+
         try:
             os.mkdir(path)
         except FileExistsError:
