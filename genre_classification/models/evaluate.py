@@ -87,7 +87,7 @@ def load_experiment(parsed_params, return_embeddings=False, device='cpu'):
     with open(path_params) as json_file:
         params = json.load(json_file)
     
-    state_dict = torch.load(path_best_model)
+    state_dict = torch.load(path_best_model, map_location=device)
     model = MyCNNNetwork(return_embeddings=return_embeddings, dropout=params['dropout'])
     model.load_state_dict(state_dict)
     model = model.to(device)
@@ -125,8 +125,8 @@ def main(config):
     metrics = evaluate(cnn, dataloader, config.device)
     
     save_evaluation_data(metrics, dataset.genres, parsed_params['experiment_name'], set_=parsed_params['set'])
-    
-    
+
+
 if __name__ == '__main__':
     main(config)
 
