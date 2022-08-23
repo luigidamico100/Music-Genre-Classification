@@ -1,7 +1,7 @@
-genre_classification
+Project source code
 ==============================
 
-Source code of the project. This is an installable python module.
+Source code of the project. This is an installable Python module. The scripts and functions inside this module can be referenced by any Python script by typing `from genre_classification import ...`.
 
 
 # Pipeline
