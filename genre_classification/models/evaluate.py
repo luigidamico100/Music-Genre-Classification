@@ -79,10 +79,10 @@ def save_evaluation_data(metrics, genres, experiment_name, set_='val'):
     print()
     
 
-def load_experiment(parsed_params, return_embeddings=False, device='cpu'):
+def load_experiment(experiment_name, return_embeddings=False, device='cpu'):
     
-    path_best_model = get_path_experiment(parsed_params['experiment_name'], file_type='best_model')
-    path_params = get_path_experiment(parsed_params['experiment_name'], file_type='json')
+    path_best_model = get_path_experiment(experiment_name, file_type='best_model')
+    path_params = get_path_experiment(experiment_name, file_type='json')
 
     with open(path_params) as json_file:
         params = json.load(json_file)
@@ -101,8 +101,8 @@ def main(config):
     print('----- Parsed params -----')
     print(parsed_params)
     print()
-    cnn, params = load_experiment(parsed_params, device=config.device)
-    print('----- Params from the experiment loaded-----')
+    cnn, params = load_experiment(parsed_params['experiment_name'], device=config.device)
+    print('----- Params from the experiment -----')
     print(params)
     print()
 

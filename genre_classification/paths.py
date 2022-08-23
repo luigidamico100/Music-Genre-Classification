@@ -15,9 +15,12 @@ path_annotations = os.path.join(project_root_path, 'data', 'processed', 'annotat
 path_class_to_genre_map = os.path.join(project_root_path, 'data', 'processed', 'class_to_genre_map.pkl')
 path_genre_to_class_map = os.path.join(project_root_path, 'data', 'processed', 'genre_to_class_map.pkl')
 
-
 # Experiment
 path_training_experiments = os.path.join(project_root_path, 'models', 'experiments')
+
+# External wav data used for inference
+path_external_wav = os.path.join(project_root_path, 'data', 'external')
+
 
 def get_path_experiment(experiment_name, file_type, overwrite_existing_experiment=True):
     """
@@ -38,8 +41,8 @@ def get_path_experiment(experiment_name, file_type, overwrite_existing_experimen
     :return: The path of the file, given the experiment name and file type
     :doc-author: Trelent
     """
-    def create_dir(path, overwrite_existing_experiment=False):
 
+    def create_dir(path, overwrite_existing_experiment=False):
 
         try:
             os.mkdir(path)
@@ -48,18 +51,18 @@ def get_path_experiment(experiment_name, file_type, overwrite_existing_experimen
                 pass
             else:
                 raise FileExistsError()
-    
+
     path_folder = os.path.join(path_training_experiments, experiment_name)
     path_folder_training = os.path.join(path_folder, 'training')
     path_folder_evaluation = os.path.join(path_folder, 'evaluation')
     path_folder_embeddings = os.path.join(path_folder, 'embeddings')
-    
+
     create_dir(path_folder, overwrite_existing_experiment)
     create_dir(path_folder_training, overwrite_existing_experiment)
     create_dir(path_folder_evaluation, overwrite_existing_experiment)
     create_dir(path_folder_embeddings, overwrite_existing_experiment)
-    
-    admitted_file_type = ['df_training_history', 'training_plot', 'best_model', 'training_log', 'json', 
+
+    admitted_file_type = ['df_training_history', 'training_plot', 'best_model', 'training_log', 'json',
                           'df_conf_matrix_val', 'df_conf_matrix_norm_val', 'metrics_val',
                           'df_conf_matrix_test', 'df_conf_matrix_norm_test', 'metrics_test',
                           'df_conf_matrix_train', 'df_conf_matrix_norm_train', 'metrics_train',
@@ -69,87 +72,90 @@ def get_path_experiment(experiment_name, file_type, overwrite_existing_experimen
                           'df_embeddings_val', 'df_genres_val',
                           'df_embeddings_test', 'df_genres_test']
     assert file_type in admitted_file_type
-    
+
     # ---------- training ---------- 
-    if file_type=='df_training_history':
+    if file_type == 'df_training_history':
         file_name = 'df_training_history.csv'
         path_file = os.path.join(path_folder_training, file_name)
-    elif file_type=='training_plot':
+    elif file_type == 'training_plot':
         file_name = 'training_plot.jpg'
         path_file = os.path.join(path_folder_training, file_name)
-    elif file_type=='best_model':
+    elif file_type == 'best_model':
         file_name = 'best_model.pth'
         path_file = os.path.join(path_folder, file_name)
-    elif file_type=='training_log':
+    elif file_type == 'training_log':
         file_name = 'training_log.log'
         path_file = os.path.join(path_folder_training, file_name)
-    elif file_type=='json':
+    elif file_type == 'json':
         file_name = 'params.json'
         path_file = os.path.join(path_folder, file_name)
-        
+
     # ---------- evaluation ---------- 
-    elif file_type=='metrics_val':
+    elif file_type == 'metrics_val':
         file_name = 'metrics_val.txt'
         path_file = os.path.join(path_folder_evaluation, file_name)
-    elif file_type=='df_conf_matrix_val':
+    elif file_type == 'df_conf_matrix_val':
         file_name = 'df_confusion_matrix_val.csv'
         path_file = os.path.join(path_folder_evaluation, file_name)
-    elif file_type=='df_conf_matrix_norm_val':
+    elif file_type == 'df_conf_matrix_norm_val':
         file_name = 'df_confusion_matrix_norm_val.csv'
         path_file = os.path.join(path_folder_evaluation, file_name)
-    elif file_type=='metrics_test':
+    elif file_type == 'metrics_test':
         file_name = 'metrics_test.txt'
         path_file = os.path.join(path_folder_evaluation, file_name)
-    elif file_type=='df_conf_matrix_test':
+    elif file_type == 'df_conf_matrix_test':
         file_name = 'df_confusion_matrix_test.csv'
         path_file = os.path.join(path_folder_evaluation, file_name)
-    elif file_type=='df_conf_matrix_norm_test':
+    elif file_type == 'df_conf_matrix_norm_test':
         file_name = 'df_confusion_matrix_norm_test.csv'
         path_file = os.path.join(path_folder_evaluation, file_name)
-    elif file_type=='metrics_train':
+    elif file_type == 'metrics_train':
         file_name = 'metrics_train.txt'
         path_file = os.path.join(path_folder_evaluation, file_name)
-    elif file_type=='df_conf_matrix_train':
+    elif file_type == 'df_conf_matrix_train':
         file_name = 'df_confusion_matrix_train.csv'
         path_file = os.path.join(path_folder_evaluation, file_name)
-    elif file_type=='df_conf_matrix_norm_train':
+    elif file_type == 'df_conf_matrix_norm_train':
         file_name = 'df_confusion_matrix_norm_train.csv'
         path_file = os.path.join(path_folder_evaluation, file_name)
-    elif file_type=='metrics_all':
+    elif file_type == 'metrics_all':
         file_name = 'metrics_all.txt'
         path_file = os.path.join(path_folder_evaluation, file_name)
-    elif file_type=='df_conf_matrix_all':
+    elif file_type == 'df_conf_matrix_all':
         file_name = 'df_confusion_matrix_all.csv'
         path_file = os.path.join(path_folder_evaluation, file_name)
-    elif file_type=='df_conf_matrix_norm_all':
+    elif file_type == 'df_conf_matrix_norm_all':
         file_name = 'df_confusion_matrix_norm_all.csv'
         path_file = os.path.join(path_folder_evaluation, file_name)
-        
+
     # ---------- embeddings ---------- 
-    elif file_type=='df_embeddings_val':
+    elif file_type == 'df_embeddings_val':
         file_name = 'df_embeddings_val.csv'
         path_file = os.path.join(path_folder_embeddings, file_name)
-    elif file_type=='df_genres_val':
+    elif file_type == 'df_genres_val':
         file_name = 'df_genres_val.csv'
         path_file = os.path.join(path_folder_embeddings, file_name)
-    elif file_type=='df_embeddings_test':
+    elif file_type == 'df_embeddings_test':
         file_name = 'df_embeddings_test.csv'
         path_file = os.path.join(path_folder_embeddings, file_name)
-    elif file_type=='df_genres_test':
+    elif file_type == 'df_genres_test':
         file_name = 'df_genres_test.csv'
         path_file = os.path.join(path_folder_embeddings, file_name)
-    elif file_type=='df_embeddings_train':
+    elif file_type == 'df_embeddings_train':
         file_name = 'df_embeddings_train.csv'
         path_file = os.path.join(path_folder_embeddings, file_name)
-    elif file_type=='df_genres_train':
+    elif file_type == 'df_genres_train':
         file_name = 'df_genres_train.csv'
         path_file = os.path.join(path_folder_embeddings, file_name)
-    elif file_type=='df_embeddings_all':
+    elif file_type == 'df_embeddings_all':
         file_name = 'df_embeddings_all.csv'
         path_file = os.path.join(path_folder_embeddings, file_name)
-    elif file_type=='df_genres_all':
+    elif file_type == 'df_genres_all':
         file_name = 'df_genres_all.csv'
         path_file = os.path.join(path_folder_embeddings, file_name)
-    
+
     return path_file
-##########################################################################################################
+
+
+def get_path_external_wav(wav_filename):
+    return os.path.join(path_external_wav, wav_filename)

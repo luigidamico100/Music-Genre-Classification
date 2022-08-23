@@ -82,8 +82,8 @@ def main(config):
     print('----- Parsed params -----')
     print(parsed_params)
     print()
-    cnn, params = load_experiment(parsed_params, return_embeddings=True, device=config.device)
-    print('----- Params from the experiment loaded-----')
+    cnn, params = load_experiment(parsed_params['experiment_name'], return_embeddings=True, device=config.device)
+    print('----- Params from the experiment -----')
     print(params)
     print()
 

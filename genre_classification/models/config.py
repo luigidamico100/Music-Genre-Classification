@@ -120,11 +120,11 @@ def parse_params(config, reason='training'):
         
     elif reason == 'inference':
         parser = argparse.ArgumentParser(description='New .wav inference')
-        parser.add_argument('wav_path', type=str, help='wav patg')
+        parser.add_argument('wav_filename', type=str, help='wav filename')
         parser.add_argument('--experiment_name', type=str, help='Experiment name', default=config.experiment_name)
         args = parser.parse_args()
 
-        params['wav_path'] = args.wav_path
+        params['wav_filename'] = args.wav_filename
         params['experiment_name'] = args.experiment_name
         
         return params

@@ -11,11 +11,11 @@ import time
 from genre_classification.models.cnn import CNNNetwork, MyCNNNetwork
 from genre_classification.models.dataset import create_data_loader
 from genre_classification.paths import (
-    path_annotations, 
+    path_annotations,
     path_class_to_genre_map,
     path_genre_to_class_map,
     get_path_experiment
-    )
+)
 from genre_classification.models import config
 import json
 from genre_classification.models.config import MyLogger
@@ -89,9 +89,9 @@ def validate_single_epoch(model, dataloader, loss_fn, device):
         for input, target in dataloader:
             input, target = input.to(device), target.to(device)
             b, c, f, t = input.shape  # batchs, chunks, freq., time
-            input = input.view(-1, f, t)    # (b, c, f, t) -> (b*c, f, t)
+            input = input.view(-1, f, t)  # (b, c, f, t) -> (b*c, f, t)
             prediction = model(input)
-            prediction = prediction.view(b, c, -1).mean(dim=1) # Check that
+            prediction = prediction.view(b, c, -1).mean(dim=1)  # Check that
             loss = loss_fn(prediction, target)
             _, predicted = torch.max(prediction.data, dim=1)
 
@@ -129,7 +129,7 @@ def train(model, train_dataloader, val_dataloader, loss_fn, optimiser, device, e
     start_time = time.time()
     best_val_loss = np.inf
     best_epoch = None
-    for i in range(1, epochs+1):
+    for i in range(1, epochs + 1):
         print(f"Epoch {i}")
         train_data.append(train_single_epoch(model, train_dataloader, loss_fn, optimiser, device))
         val_data.append(validate_single_epoch(model, val_dataloader, loss_fn, device))
@@ -155,10 +155,10 @@ def train(model, train_dataloader, val_dataloader, loss_fn, optimiser, device, e
 
 
 def save_training_data(df_training_history, params, model, mylogger):
-
     with sns.axes_style("darkgrid"):
         fig, axs = plt.subplots(2, 1)
-        sns.lineplot(data=df_training_history, x=df_training_history.index, y='train_loss', label='train_loss', ax=axs[0])
+        sns.lineplot(data=df_training_history, x=df_training_history.index, y='train_loss', label='train_loss',
+                     ax=axs[0])
         sns.lineplot(data=df_training_history, x=df_training_history.index, y='val_loss', label='val_loss', ax=axs[0])
         axs[0].set_ylabel('Loss')
         sns.lineplot(data=df_training_history, x=df_training_history.index, y='train_acc', label='train_acc', ax=axs[1])
@@ -173,7 +173,7 @@ def save_training_data(df_training_history, params, model, mylogger):
     path_training_plot = get_path_experiment(experiment_name, file_type='training_plot')
     path_best_model = get_path_experiment(experiment_name, file_type='best_model')
     path_params = get_path_experiment(experiment_name, file_type='json')
-    
+
     print(f'Saving training_log to {path_training_log}')
     mylogger.write_on_file(path_training_log)
     print(f'Saving df_training_history to {path_df_training_history}')
@@ -185,49 +185,48 @@ def save_training_data(df_training_history, params, model, mylogger):
     print(f'Saving params json to {path_params}')
     with open(path_params, 'w') as outfile:
         json.dump(params, outfile)
-        
+
 
 def main(config):
-    
     parsed_params = config.parse_params(config, reason='training')
     mylogger = MyLogger()
-    
+
     print('----- Parsed params -----')
     mylogger.write(str(parsed_params))
     print()
-         
-    #save_params(train_debug_mode, n_examples, experiment_name, epochs, learning_rate, chunks_len_sec)
-    
+
+    # save_params(train_debug_mode, n_examples, experiment_name, epochs, learning_rate, chunks_len_sec)
+
     mel_spectrogram_params = {'n_fft': parsed_params['melspec_fft'],
                               'hop_length': parsed_params['melspec_hop_length'],
                               'n_mels': parsed_params['melspec_n_mels']}
-    
+
     train_dataloader, train_dataset = create_data_loader(set_='train',
-                                             batch_size=parsed_params['batch_size'],
-                                             mel_spectrogram_params=mel_spectrogram_params,
-                                             path_annotations_file=path_annotations,
-                                             path_class_to_genre_map=path_class_to_genre_map,
-                                             path_genre_to_class_map=path_genre_to_class_map,
-                                             training=True,
-                                             augment=True,
-                                             n_examples=parsed_params['n_examples'],
-                                             target_sample_rate=config.sample_rate,
-                                             chunks_len_sec=parsed_params['chunks_len_sec'],
-                                             device=config.device,)
-    
+                                                         batch_size=parsed_params['batch_size'],
+                                                         mel_spectrogram_params=mel_spectrogram_params,
+                                                         path_annotations_file=path_annotations,
+                                                         path_class_to_genre_map=path_class_to_genre_map,
+                                                         path_genre_to_class_map=path_genre_to_class_map,
+                                                         training=True,
+                                                         augment=True,
+                                                         n_examples=parsed_params['n_examples'],
+                                                         target_sample_rate=config.sample_rate,
+                                                         chunks_len_sec=parsed_params['chunks_len_sec'],
+                                                         device=config.device, )
+
     val_dataloader, val_dataset = create_data_loader(set_='val',
-                                             batch_size=parsed_params['batch_size'],
-                                             mel_spectrogram_params=mel_spectrogram_params,
-                                             path_annotations_file=path_annotations,
-                                             path_class_to_genre_map=path_class_to_genre_map,
-                                             path_genre_to_class_map=path_genre_to_class_map,
-                                             training=False,
-                                             augment=False,
-                                             n_examples=parsed_params['n_examples'],
-                                             target_sample_rate=config.sample_rate,
-                                             chunks_len_sec=parsed_params['chunks_len_sec'],
-                                             device=config.device,)
-    
+                                                     batch_size=parsed_params['batch_size'],
+                                                     mel_spectrogram_params=mel_spectrogram_params,
+                                                     path_annotations_file=path_annotations,
+                                                     path_class_to_genre_map=path_class_to_genre_map,
+                                                     path_genre_to_class_map=path_genre_to_class_map,
+                                                     training=False,
+                                                     augment=False,
+                                                     n_examples=parsed_params['n_examples'],
+                                                     target_sample_rate=config.sample_rate,
+                                                     chunks_len_sec=parsed_params['chunks_len_sec'],
+                                                     device=config.device, )
+
     print('----- Dataset tensor shapes -----')
     print(f'train_dataset\t-> input shape: {train_dataset[0][0].shape}')
     print(f'val_dataset  \t-> input shape: {val_dataset[0][0].shape}')
@@ -246,13 +245,13 @@ def main(config):
 
     # train model
     df_training_history, best_model = train(model=cnn,
-                                         train_dataloader=train_dataloader,
-                                         val_dataloader=val_dataloader,
-                                         loss_fn=loss_fn,
-                                         optimiser=optimiser,
-                                         device=config.device,
-                                         epochs=parsed_params['epochs'],
-                                         mylogger=mylogger)
+                                            train_dataloader=train_dataloader,
+                                            val_dataloader=val_dataloader,
+                                            loss_fn=loss_fn,
+                                            optimiser=optimiser,
+                                            device=config.device,
+                                            epochs=parsed_params['epochs'],
+                                            mylogger=mylogger)
 
     save_training_data(df_training_history, params=parsed_params, model=best_model, mylogger=mylogger)
 
