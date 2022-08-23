@@ -1,7 +1,9 @@
 Project source code
 ==============================
 
-Source code of the project. This is an installable Python module. The scripts and functions inside this module can be referenced by any Python script by typing `from genre_classification import ...`.
+Source code of the project. This is an installable Python module. 
+
+The scripts and functions inside this module can be referenced by any Python script by typing `from genre_classification import ...`.
 
 
 # Pipeline
@@ -16,7 +18,7 @@ To generate the the annotation dataset used for the modelling, run
  
 It takes as input the wav and images in `path_raw_wav_original` and `path_raw_images_original` a output the annotations file in `path_annotations`. This scripts divide the examples in different folds, with a total of `20` folds (`0..19`) in a stratified fashion i.e. in each folder, there is the same number of examples of different class (genre)
 
-## Traing and evaluation
+## Trainig and evaluation
 
 
 ### Config file
