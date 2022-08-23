@@ -12,11 +12,11 @@ Place in the current directory to directly use the commands indicated below.
 
 ## Generate the dataset
 
-To generate the the annotation dataset used for the modelling, run
+To generate the annotation dataset used for the modelling, run
 
     python data/make_dataset.py
  
-It takes as input the wav and images in `path_raw_wav_original` and `path_raw_images_original` a output the annotations file in `path_annotations`. This scripts divide the examples in different folds, with a total of `20` folds (`0..19`) in a stratified fashion i.e. in each folder, there is the same number of examples of different class (genre)
+It takes as input the wav and images in `path_raw_wav_original` and `path_raw_images_original` and outputs the annotations file in `path_annotations`. This scripts divide the examples in different folds, with a total of `20` folds (`0..19`) in a stratified fashion i.e. in each folder, there is the same number of examples of different class (genre)
 
 ## Trainig and evaluation
 
@@ -62,7 +62,7 @@ To evaluate the model run
 
 
 
-The out will be stored in the `/models/experiments/{experiment_name}/evaluation/` folder. In particular, tree files are generated:
+The output will be stored in the `/models/experiments/{experiment_name}/evaluation/` folder. In particular, tree files are generated:
 
  - `metrics_{set}.txt` 
  - `df_confusion_matrix_{set}.csv`
@@ -78,7 +78,7 @@ To generate the embeddings of the examples run
 `{set}` is the set (`Valiation set`, `Test set`) used to compute the embeddings. Call the help (`--help`) for more informations. 
 
 
-The out will be stored in the `/models/experiments/{experiment_name}/embeddings/` folder. In particular, two files are generated:
+The output will be stored in the `/models/experiments/{experiment_name}/embeddings/` folder. In particular, two files are generated:
 
 
  - `df_embeddings_{set}.csv`: embeddings for each example
