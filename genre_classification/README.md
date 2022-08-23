@@ -81,7 +81,7 @@ The output will be stored in the `/models/experiments/{experiment_name}/training
 To evaluate the model run 
 
 
-    python model/inference.py --experiment_name {my_experiment} --set {set}
+    python model/inference.py --experiment_name {experiment_name} --set {set}
 
 `{set}` is the set (`Valiation set`, `Test set`) used to perform evaluation and to compute the metrics. Call the help (`--help`) for more informations. 
 
@@ -98,7 +98,7 @@ The out will be stored in the `/models/experiments/{experiment_name}/evaluation/
 
 To generate the embeddings of the examples run
 
-    python model/inference.py --experiment_name {my_experiment} --set {set}
+    python model/inference.py --experiment_name {experiment_name} --set {set}
 
 `{set}` is the set (`Valiation set`, `Test set`) used to compute the embeddings. Call the help (`--help`) for more informations. 
 
@@ -110,6 +110,23 @@ The out will be stored in the `/models/experiments/{experiment_name}/embeddings/
  - `df_genres_{set}.csv`: name of each example together with the predicted genre
 
 The generated files are compliant with the input of the [Embedding Projector by Tensorflow](https://projector.tensorflow.org)
+
+
+
+# Inference
+
+In order to use your trained model on new and unlabeled .wav files, run
+
+    python model/inference.py {wav_filename} --experiment_name {experiment_name}
+
+Call the help (`--help`) for more informations. The {wav_filename} is the name of a new wav file located in `/data/external/` folder. The script print out the predicted genre and the probabilities for each class. 
+
+
+
+
+
+
+
 
 
 

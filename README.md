@@ -46,6 +46,27 @@ The project package can be install using
 The project folder [genre_classification](genre_classification) is installed as a python package and it can be now referenced anywhere. 
 
 
+
+# API service
+
+Once an experiment is executed (follow the guide in [genre_classification](genre_classification)), the API service can be used. The API service is used to make inference on a new and unlabeled wav file located in `/data/external` folder.
+
+Start the server by running
+
+    uvicorn app:app --reload
+
+Run your browser to test the service API.
+
+Go to the address 
+
+    http://127.0.0.1:8000
+
+or 
+
+    http://127.0.0.1:8000/docs
+
+
+
 Project Organization
 ------------
 
