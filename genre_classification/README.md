@@ -119,7 +119,7 @@ In order to use your trained model on new and unlabeled .wav files, run
 
     python model/inference.py {wav_filename} --experiment_name {experiment_name}
 
-Call the help (`--help`) for more informations. The {wav_filename} is the name of a new wav file located in `/data/external/` folder. The script print out the predicted genre and the probabilities for each class. 
+Call the help (`--help`) for more informations. The `{wav_filename}` is the name of a new wav file located in `/data/external/` folder. The script print out the predicted genre and the probabilities for each class. 
 
 
 
