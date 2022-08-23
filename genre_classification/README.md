@@ -1,34 +1,7 @@
-# Paths
+genre_classification
+==============================
 
-The scripts interact between them using files which can used as input or as output for the scripts. 
-The file paths are stored in `genre_classification/paths.py` file. In the current configuration the variable are :
-
- 
-
-    - path_raw_wav_original = genre_classification/data/raw/genres_original
-    - path_raw_images_original = genre_classificaiton/data/raw/images_original
-    - path_raw_features_3_sec = genre_classification/data/raw/features_3_sec.csv
-    - path_raw_features_30_sec = genre_classification/data/raw/features_30_sec.csv
-    
-    - path_annotations = genre_classification/data/processed/annotations.csv
-    - path_class_to_genre_map = genre_classification/data/processed/class_to_genre_map.pkl
-    - path_genre_to_class_map = genre_classification/data/processed/genre_to_class_map.pkl
-    
-    - path_training_experiments = genre_classification/models/experiments
-    
-The paths above contain the following things:
-
- - `path_raw_wav_original`: ....
- - `path_raw_images_original`
- - `path_raw_features_3_sec`
- - `path_raw_features_30_sec`
-
- - `path_annotations`
- - `path_class_to_genre_map`
- - `path_genre_to_class_map`
- 
- - `path_training_experiments`
-
+Source code of the project. This is an installable python module.
 
 
 # Pipeline
@@ -119,8 +92,39 @@ In order to use your trained model on new and unlabeled .wav files, run
 
     python model/inference.py {wav_filename} --experiment_name {experiment_name}
 
-Call the help (`--help`) for more informations. The `{wav_filename}` is the name of a new wav file located in `/data/external/` folder. The script prints out the predicted genre and the probabilities for each class. 
+Call the help (`--help`) for more informations. The `{wav_filename}` is the name of a new wav file located in `/data/external/` folder. The script prints out the predicted genre and the probabilities for each genre. 
 
+
+# Paths
+
+The scripts interact between them using files which can used as input or as output for the scripts. 
+The file paths are stored in `genre_classification/paths.py` file. In the current configuration the variable are :
+
+ 
+
+    - path_raw_wav_original = genre_classification/data/raw/genres_original
+    - path_raw_images_original = genre_classificaiton/data/raw/images_original
+    - path_raw_features_3_sec = genre_classification/data/raw/features_3_sec.csv
+    - path_raw_features_30_sec = genre_classification/data/raw/features_30_sec.csv
+    
+    - path_annotations = genre_classification/data/processed/annotations.csv
+    - path_class_to_genre_map = genre_classification/data/processed/class_to_genre_map.pkl
+    - path_genre_to_class_map = genre_classification/data/processed/genre_to_class_map.pkl
+    
+    - path_training_experiments = genre_classification/models/experiments
+    
+The paths above contain the following things:
+
+ - `path_raw_wav_original`: ....
+ - `path_raw_images_original`
+ - `path_raw_features_3_sec`
+ - `path_raw_features_30_sec`
+
+ - `path_annotations`
+ - `path_class_to_genre_map`
+ - `path_genre_to_class_map`
+ 
+ - `path_training_experiments`
 
 
 
