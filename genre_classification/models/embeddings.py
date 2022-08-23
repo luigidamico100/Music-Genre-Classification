@@ -83,7 +83,7 @@ def main(config):
     print(parsed_params)
     print()
     cnn, params = load_experiment(parsed_params, return_embeddings=True, device=config.device)
-    print('----- Params -----')
+    print('----- Params from the experiment loaded-----')
     print(params)
     print()
 
