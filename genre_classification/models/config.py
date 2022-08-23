@@ -15,7 +15,7 @@ epochs = 100
 learning_rate = 0.001
 
 # Model params
-dropout = 0.1
+dropout = 0.
 
 # Signal processing params
 sample_rate = 22050
