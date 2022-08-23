@@ -109,7 +109,7 @@ The out will be stored in the `/models/experiments/{experiment_name}/embeddings/
  - `df_embeddings_{set}.csv`: embeddings for each example
  - `df_genres_{set}.csv`: name of each example together with the predicted genre
 
-The generated .csv are compliant with the input of the [Embedding Projector by Tensorflow] (https://projector.tensorflow.org)
+The generated .csv are compliant with the input of the [Embedding Projector by Tensorflow](https://projector.tensorflow.org)
 
 
 
