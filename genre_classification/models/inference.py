@@ -10,7 +10,7 @@ import torch
 from torch.nn.functional import softmax
 import numpy as np
 import pandas as pd
-from genre_classification.paths import path_class_to_genre_map
+from genre_classification.paths import path_class_to_genre_map, get_path_external_wav
 from genre_classification.models.dataset import get_preprocessed_wav
 from genre_classification.models import config
 from genre_classification.models.evaluate import load_experiment
@@ -19,7 +19,6 @@ pd.set_option('display.precision', 2)
 
 
 def predict(model, signal_chunks, class_to_genre_map):
-
     model.eval()
     with torch.no_grad():
         prediction = model(signal_chunks)
@@ -42,22 +41,18 @@ def predict(model, signal_chunks, class_to_genre_map):
     return predicted_genre, df_prediction_proba
 
 
-def main():
-    parsed_params = config.parse_params(config, reason='inference')
-    print('----- Parsed params -----')
-    print(parsed_params)
-    print()
-
-    cnn, params = load_experiment(parsed_params, device=config.device)
-    print('----- Params -----')
+def inference(experiment_name, wav_filename):
+    cnn, params = load_experiment(experiment_name, device=config.device)
+    print('----- Params from the experiment -----')
     print(params)
     print()
-
-    wav_path = parsed_params['wav_path']
 
     mel_spectrogram_params = {'n_fft': params['melspec_fft'],
                               'hop_length': params['melspec_hop_length'],
                               'n_mels': params['melspec_n_mels']}
+
+    wav_path = get_path_external_wav(wav_filename)
+    print(wav_path)
 
     signal_chunks, class_to_genre_map = get_preprocessed_wav(wav_file_path=wav_path,
                                                              path_class_to_genre_map=path_class_to_genre_map,
@@ -67,9 +62,18 @@ def main():
                                                              verbose=True,
                                                              device=config.device)
 
-    cnn, params = load_experiment(parsed_params, device=config.device)
-
     predicted_genre, df_prediction_proba = predict(cnn, signal_chunks, class_to_genre_map)
+
+    return predicted_genre, df_prediction_proba
+
+
+def main():
+    parsed_params = config.parse_params(config, reason='inference')
+    print('----- Parsed params -----')
+    print(parsed_params)
+    print()
+
+    predicted_genre, df_prediction_proba = inference(parsed_params['experiment_name'], parsed_params['wav_filename'])
 
     print(f'\n--> Predicted genre: {predicted_genre}\n')
     print(df_prediction_proba)
