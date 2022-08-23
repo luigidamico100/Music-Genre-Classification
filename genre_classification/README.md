@@ -33,11 +33,13 @@ The paths above contain the following things:
 
 # Pipeline
 
+Place in the current directory to directly use the commands indicated below. 
+
 ## Generate the dataset
 
 To generate the the annotation dataset used for the modelling, run
 
-    python genre_classification/data/make_dataset.py
+    python data/make_dataset.py
  
 It takes as input the wav and images in `path_raw_wav_original` and `path_raw_images_original` a output the annotations file in `path_annotations`. This scripts divide the examples in different folds, with a total of `20` folds (`0..19`) in a stratified fashion i.e. in each folder, there is the same number of examples of different class (genre)
 
@@ -58,7 +60,7 @@ The script provides utility functions to the dataset and dataloader creation. Th
 ### Train the model
 To train the model run
 
-    python genre_classification/model/train.py --experiment_name {my_experiment}
+    python model/train.py --experiment_name {experiment_name}
 
 You can see all the parameters that can be passed to a script by typing
 
@@ -66,7 +68,48 @@ You can see all the parameters that can be passed to a script by typing
 
 This script take as input the annotation file in `path_annotations` and execute the training using `Training set` and evaluate the performance on the `Validation set`.
 
+The output will be stored in the `/models/experiments/{experiment_name}/training/` folder. In particular, tree files are generated:
+
+ - `training_plot.jpg` 
+ - `df_training_history.csv`
+ - `training_log.log` 
+
+
 
 ### Evaluate the model
+
+To evaluate the model run 
+
+
+    python model/inference.py --experiment_name {my_experiment} --set {set}
+
+`{set}` is the set (`Valiation set`, `Test set`) used to perform evaluation and to compute the metrics. Call the help (`--help`) for more information. 
+
+
+
+The out will be stored in the `/models/experiments/{experiment_name}/evaluation/` folder. In particular, tree files are generated:
+
+ - `metrics_{set}.txt` 
+ - `df_confusion_matrix_{set}.csv`
+ - `df_confusion_matrix_norm_{set}.csv`  
+
+
+### Generate embeddings
+
+To generate the embeddings of the examples run
+
+    python model/inference.py --experiment_name {my_experiment} --set {set}
+
+`{set}` is the set (`Valiation set`, `Test set`) used to compute the embeddings. Call the help (`--help`) for more information. 
+
+
+The out will be stored in the `/models/experiments/{experiment_name}/embeddings/` folder. In particular, two files are generated:
+
+
+ - `df_embeddings_{set}.csv`: embeddings for each example
+ - `df_genres_{set}.csv`: name of each example together with the predicted genre
+
+The generated .csv are compliant with the input of the [Embedding Projector by Tensorflow] (https://projector.tensorflow.org)
+
 
 
