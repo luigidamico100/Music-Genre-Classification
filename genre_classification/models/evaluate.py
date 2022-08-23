@@ -57,12 +57,6 @@ def save_evaluation_data(metrics, genres, experiment_name, set_='val'):
     path_df_conf_matrix_norm = get_path_experiment(experiment_name, file_type=f'df_conf_matrix_norm_{set_}')
     path_metrics = get_path_experiment(experiment_name, file_type=f'metrics_{set_}')
     
-    print(f'--------- {set_} ---------')
-    print(f"Accuracy = {metrics['accuracy']}")
-    print(f"f1 score = {metrics['f1 score']}")
-    print(f"Confusion matrix = \n {metrics['confusion matrix']}")
-    print()
-    
     print(f'Saving metrics_{set_} to {path_metrics}')
     metrics_text = f"Accuracy = {metrics['accuracy']:.3f}\nf1 score = {metrics['f1 score']:.3f}"
     with open(path_metrics, 'w') as f:
@@ -73,9 +67,15 @@ def save_evaluation_data(metrics, genres, experiment_name, set_='val'):
     df_conf_matrix.to_csv(path_df_conf_matrix)
     
     print(f'Saving df_conf_matrix_norm_{set_} to {path_df_conf_matrix_norm}')
-    df_conf_matrix = pd.DataFrame(data=metrics['confusion matrix norm'], columns=genres, index=genres)
-    df_conf_matrix.to_csv(path_df_conf_matrix_norm)
+    df_conf_matrix_norm = pd.DataFrame(data=metrics['confusion matrix norm'], columns=genres, index=genres)
+    df_conf_matrix_norm.to_csv(path_df_conf_matrix_norm)
     
+    print()
+    
+    print(f'--------- {set_} ---------')
+    print(f"Accuracy = {metrics['accuracy']}")
+    print(f"f1 score = {metrics['f1 score']}")
+    print(f"Confusion matrix = \n {df_conf_matrix}")
     print()
     
 
@@ -87,7 +87,7 @@ def load_experiment(parsed_params, return_embeddings=False, device='cpu'):
     with open(path_params) as json_file:
         params = json.load(json_file)
     
-    state_dict = torch.load(path_best_model)
+    state_dict = torch.load(path_best_model, map_location=device)
     model = MyCNNNetwork(return_embeddings=return_embeddings, dropout=params['dropout'])
     model.load_state_dict(state_dict)
     model = model.to(device)
@@ -102,7 +102,7 @@ def main(config):
     print(parsed_params)
     print()
     cnn, params = load_experiment(parsed_params, device=config.device)
-    print('----- Params -----')
+    print('----- Params from the experiment loaded-----')
     print(params)
     print()
 
@@ -125,8 +125,8 @@ def main(config):
     metrics = evaluate(cnn, dataloader, config.device)
     
     save_evaluation_data(metrics, dataset.genres, parsed_params['experiment_name'], set_=parsed_params['set'])
-    
-    
+
+
 if __name__ == '__main__':
     main(config)
 

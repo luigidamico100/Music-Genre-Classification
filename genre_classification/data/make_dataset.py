@@ -53,6 +53,7 @@ def create_df_annotation(path_orig):
 
 
 def create_class_genre_maps(genres):
+    genres.sort()  # make the map reproducible
     genre_to_class_map = {genre: idx for idx, genre in enumerate(genres)}
     class_to_genre_map = {genre_to_class_map[genre]: genre for genre in genre_to_class_map}
     return class_to_genre_map, genre_to_class_map

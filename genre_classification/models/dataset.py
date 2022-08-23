@@ -19,6 +19,88 @@ from torchaudio_augmentations import (
 )
 
 
+def read_wav_and_preprocess(wav_file_path,
+                            wav_to_spec_transformation,
+                            target_sample_rate,
+                            num_samples,
+                            training=False,
+                            verbose_sample_wasting=False,
+                            device='cpu'):
+    def resample(signal, sr, target_sample_rate):
+        if sr != target_sample_rate:
+            resampler = torchaudio.transforms.Resample(sr, target_sample_rate)
+            signal = resampler(signal)
+        return signal
+
+    def mix_down(signal):
+        signal = torch.mean(signal, dim=0, keepdim=False)
+        return signal
+
+    def adjust_audio_len(signal, num_samples):
+        random_index = random.randint(0, len(signal) - num_samples - 1)
+        signal = signal[random_index: random_index + num_samples]
+        return signal
+
+    def get_signal_chunks(signal, num_samples, target_sample_rate):
+        num_chunks = len(signal) // num_samples
+        len_pre = len(signal)
+        signal = signal[:num_chunks * num_samples]
+        len_post = len(signal)
+        signal = torch.reshape(signal, (num_chunks, num_samples))
+        if verbose_sample_wasting:
+            print(f'Losed {len_pre - len_post} samples ({((len_pre - len_post) / target_sample_rate):.1f}) sec')
+        return signal
+
+    def _get_augmentations_pytorch(self):
+        from torch import nn
+        transforms = nn.Sequential(
+            torchaudio.transforms.Vol()
+        )
+
+        transforms = [
+            RandomResizedCrop(n_samples=self.num_samples).to(self.device),
+            RandomApply([PolarityInversion()], p=0.8).to(self.device),
+            # RandomApply([Noise(min_snr=0.3, max_snr=0.5)], p=0.3).to(self.device),
+            RandomApply([Gain()], p=0.2).to(self.device),
+            RandomApply([HighLowPass(sample_rate=22050)], p=0.8).to(self.device),
+            RandomApply([Delay(sample_rate=22050)], p=0.5).to(self.device),
+            # RandomApply([PitchShift(n_samples=self.num_samples, sample_rate=22050)], p=0.4).to(self.device),
+            # RandomApply([Reverb(sample_rate=22050)], p=0.3).to(self.device),
+        ]
+        self.augmentation = Compose(transforms=transforms)
+
+    def _get_augmentations(self):
+        transforms = [
+            RandomResizedCrop(n_samples=self.num_samples).to(self.device),
+            RandomApply([PolarityInversion()], p=0.8).to(self.device),
+            # RandomApply([Noise(min_snr=0.3, max_snr=0.5)], p=0.3).to(self.device),
+            RandomApply([Gain()], p=0.2).to(self.device),
+            RandomApply([HighLowPass(sample_rate=22050)], p=0.8).to(self.device),
+            RandomApply([Delay(sample_rate=22050)], p=0.5).to(self.device),
+            # RandomApply([PitchShift(n_samples=self.num_samples, sample_rate=22050)], p=0.4).to(self.device),
+            # RandomApply([Reverb(sample_rate=22050)], p=0.3).to(self.device),
+        ]
+        self.augmentation = Compose(transforms=transforms)
+
+    signal, sr = torchaudio.load(wav_file_path)
+    signal = signal.to(device)
+    signal = resample(signal, sr, target_sample_rate)
+    signal = mix_down(signal)
+    if training:
+        # signal = signal.unsqueeze(0)
+        # #signal = signal.to('cpu')
+        # signal = self.augmentation(signal)
+        # #signal = signal.to(self.device)
+        # signal = signal.squeeze(0)
+
+        signal = adjust_audio_len(signal, num_samples)
+    else:
+        signal = get_signal_chunks(signal, num_samples, target_sample_rate)
+
+    signal = wav_to_spec_transformation(signal)
+
+    return signal
+
 
 class GTZANDataset(Dataset):
 
@@ -34,32 +116,28 @@ class GTZANDataset(Dataset):
                  chunks_len_sec=7.,
                  verbose_sample_wasting=False,
                  return_wav_filename=False,
-                 mel_spectrogram_kwargs=None):
+                 wav_to_spec_transformation=None,
+                 ):
 
         self.annotations = pd.read_csv(path_annotations_file, index_col=0)
         with open(path_class_to_genre_map, 'rb') as f:
             self.class_to_genre_map = pickle.load(f)
         with open(path_genre_to_class_map, 'rb') as f:
             self.genre_to_class_map = pickle.load(f)
-        
+
         self.genres = list(self.genre_to_class_map.keys())
         self.annotations = self.annotations[self.annotations['fold'].isin(folds)]
-        if n_examples!='all':
+        if n_examples != 'all':
             self.annotations = self.annotations.sample(n_examples, random_state=42)
         self.training = training
         self.device = device
         self.target_sample_rate = target_sample_rate
         self.num_samples = int(self.target_sample_rate * chunks_len_sec)
-        #self.transformation = transformation.to(device)
+        # self.transformation = transformation.to(device)
         self.verbose_sample_wasting = verbose_sample_wasting
-        if self.training:
-            self._get_augmentations()
-        
-        self.mel_spectrogram = torchaudio.transforms.MelSpectrogram(
-            sample_rate=target_sample_rate,
-            normalized=False,
-            **mel_spectrogram_kwargs,).to(device)
-        self.amplitude_to_db = torchaudio.transforms.AmplitudeToDB().to(device)
+
+        self.wav_to_spec_transformation = wav_to_spec_transformation
+
         self.return_wav_filename = return_wav_filename
 
     def __len__(self):
@@ -83,97 +161,40 @@ class GTZANDataset(Dataset):
         sample_path = self.annotations.iloc[idx]['wav_path']
         genre = self.annotations.iloc[idx]['genre']
         label = self.genre_to_class_map[genre]
-        signal, sr = torchaudio.load(sample_path)
-        signal = signal.to(self.device)
-        signal = self.resample(signal, sr)
-        signal = self.mix_down(signal)
-        #signal = self.adjust_audio_len(signal)
-        # signal = self.cut(signal)
-        # signal = self.right_pad(signal)
-        if self.training:
-            # signal = signal.unsqueeze(0)
-            # #signal = signal.to('cpu')
-            # signal = self.augmentation(signal)
-            # #signal = signal.to(self.device)
-            # signal = signal.squeeze(0)
-            
-            signal = self.adjust_audio_len(signal)
-        else:
-            signal = self.get_signal_chunks(signal)
-        signal = self.mel_spectrogram(signal)
-        signal = self.amplitude_to_db(signal)
-        
+
+        signal = read_wav_and_preprocess(wav_file_path=sample_path,
+                                         wav_to_spec_transformation=self.wav_to_spec_transformation,
+                                         target_sample_rate=self.target_sample_rate,
+                                         num_samples=self.num_samples,
+                                         training=self.training,
+                                         verbose_sample_wasting=self.verbose_sample_wasting,
+                                         device=self.device)
+
         if self.return_wav_filename:
             wav_filename = self.annotations.iloc[idx]['wav_filename']
             return signal, label, wav_filename
         return signal, label
-    
-    def _get_augmentations_pytorch(self):
-        from torch import nn
-        transforms = nn.Sequential(
-            torchaudio.transforms.Vol()
-            )
-        
-        transforms = [
-            RandomResizedCrop(n_samples=self.num_samples).to(self.device),
-            RandomApply([PolarityInversion()], p=0.8).to(self.device),
-            #RandomApply([Noise(min_snr=0.3, max_snr=0.5)], p=0.3).to(self.device),
-            RandomApply([Gain()], p=0.2).to(self.device),
-            RandomApply([HighLowPass(sample_rate=22050)], p=0.8).to(self.device),
-            RandomApply([Delay(sample_rate=22050)], p=0.5).to(self.device),
-            #RandomApply([PitchShift(n_samples=self.num_samples, sample_rate=22050)], p=0.4).to(self.device),
-            #RandomApply([Reverb(sample_rate=22050)], p=0.3).to(self.device),
-        ]
-        self.augmentation = Compose(transforms=transforms)
-
-    def _get_augmentations(self):
-        transforms = [
-            RandomResizedCrop(n_samples=self.num_samples).to(self.device),
-            RandomApply([PolarityInversion()], p=0.8).to(self.device),
-            #RandomApply([Noise(min_snr=0.3, max_snr=0.5)], p=0.3).to(self.device),
-            RandomApply([Gain()], p=0.2).to(self.device),
-            RandomApply([HighLowPass(sample_rate=22050)], p=0.8).to(self.device),
-            RandomApply([Delay(sample_rate=22050)], p=0.5).to(self.device),
-            #RandomApply([PitchShift(n_samples=self.num_samples, sample_rate=22050)], p=0.4).to(self.device),
-            #RandomApply([Reverb(sample_rate=22050)], p=0.3).to(self.device),
-        ]
-        self.augmentation = Compose(transforms=transforms)
 
 
-    def get_signal_chunks(self, signal):
-        num_chunks = len(signal) // self.num_samples
-        len_pre = len(signal)
-        signal = signal[:num_chunks*self.num_samples]
-        len_post = len(signal)
-        signal = torch.reshape(signal, (num_chunks, self.num_samples))
-        if self.verbose_sample_wasting:
-            print(f'Losed {len_pre - len_post} samples ({((len_pre-len_post)/self.target_sample_rate):.1f}) sec')
-        return signal
-    
-    def adjust_audio_len(self, signal):
-        random_index = random.randint(0, len(signal) - self.num_samples - 1)
-        signal = signal[random_index : random_index + self.num_samples]
-        return signal
-        
-    
-    def resample(self, signal, sr):
-        if sr != self.target_sample_rate:
-            resampler = torchaudio.transforms.Resample(sr, self.target_sample_rate)
-            signal = resampler(signal)
-        return signal
+def get_wav_to_spec_transformation(mel_spectrogram_params, target_sample_rate, device):
+    mel_spectrogram = torchaudio.transforms.MelSpectrogram(
+        sample_rate=target_sample_rate,
+        normalized=False,
+        **mel_spectrogram_params, ).to(device)
+    amplitude_to_db = torchaudio.transforms.AmplitudeToDB().to(device)
 
-    def mix_down(self, signal):
-        signal = torch.mean(signal, dim=0, keepdim=False)
-        return signal
+    wav_to_spec_transformation = [mel_spectrogram, amplitude_to_db]
+    return Compose(wav_to_spec_transformation)
 
 
 def create_data_loader(set_='train', batch_size=128, mel_spectrogram_params=None, **dataset_kwargs):
     assert set_ in ['train', 'val', 'test', 'all']
-    
+
     target_sample_rate = dataset_kwargs['target_sample_rate']
     chunks_len_sec = dataset_kwargs['chunks_len_sec']
     training = dataset_kwargs['training']
-    
+    device = dataset_kwargs['device']
+
     if set_ == 'train':
         folds = list(range(0, 14))
     elif set_ == 'val':
@@ -181,15 +202,17 @@ def create_data_loader(set_='train', batch_size=128, mel_spectrogram_params=None
     elif set_ == 'test':
         folds = [17, 18, 19]
     elif set_ == 'all':
-        folds = list(range(0,20))
-            
+        folds = list(range(0, 20))
+
     if not training:
-        avg_n_samples_signal = 661794       # Adjust this!!!
+        avg_n_samples_signal = 661794  # Adjust this!!!
         num_chunks = (avg_n_samples_signal / target_sample_rate) / chunks_len_sec
         batch_size = math.floor(batch_size / num_chunks)
-        
-    dataset = GTZANDataset(folds=folds, 
-                           mel_spectrogram_kwargs=mel_spectrogram_params, 
+
+    wav_to_spec_transformation = get_wav_to_spec_transformation(mel_spectrogram_params, target_sample_rate, device)
+
+    dataset = GTZANDataset(folds=folds,
+                           wav_to_spec_transformation=wav_to_spec_transformation,
                            **dataset_kwargs,
                            )
 
@@ -197,7 +220,34 @@ def create_data_loader(set_='train', batch_size=128, mel_spectrogram_params=None
     return dataloader, dataset
 
 
-#%%
+def get_preprocessed_wav(wav_file_path,
+                         path_class_to_genre_map,
+                         mel_spectrogram_params,
+                         target_sample_rate,
+                         chunks_len_sec,
+                         verbose=False,
+                         device='cpu'):
+    num_samples = int(target_sample_rate * chunks_len_sec)
+
+    wav_to_spec_transformation = get_wav_to_spec_transformation(mel_spectrogram_params, target_sample_rate, device)
+
+    signal = read_wav_and_preprocess(wav_file_path=wav_file_path,
+                                     wav_to_spec_transformation=wav_to_spec_transformation,
+                                     target_sample_rate=target_sample_rate,
+                                     num_samples=num_samples,
+                                     training=False,
+                                     verbose_sample_wasting=verbose,
+                                     device=device)
+
+    if verbose:
+        print(f'Number of chunks: {len(signal)}')
+
+    with open(path_class_to_genre_map, 'rb') as f:
+        class_to_genre_map = pickle.load(f)
+
+    return signal, class_to_genre_map
+
+
 def main():
     import numpy as np
     from genre_classification.paths import (
@@ -220,7 +270,7 @@ def main():
                                              n_examples='all',
                                              target_sample_rate=config.sample_rate,
                                              chunks_len_sec=config.chunks_len_sec,
-                                             device=config.device,)
+                                             device=config.device, )
 
     dataloader_it = iter(dataloader)
     dataloader_out = next(dataloader_it)
@@ -233,8 +283,7 @@ def main():
     print(dataloader_out[1].shape)
 
     sample = np.array(dataloader_out[0][0][0])
-    
-    
+
+
 if __name__ == "__main__":
     main()
-    
