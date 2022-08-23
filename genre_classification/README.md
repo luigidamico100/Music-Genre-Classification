@@ -83,7 +83,7 @@ To evaluate the model run
 
     python model/inference.py --experiment_name {my_experiment} --set {set}
 
-`{set}` is the set (`Valiation set`, `Test set`) used to perform evaluation and to compute the metrics. Call the help (`--help`) for more information. 
+`{set}` is the set (`Valiation set`, `Test set`) used to perform evaluation and to compute the metrics. Call the help (`--help`) for more informations. 
 
 
 
@@ -100,7 +100,7 @@ To generate the embeddings of the examples run
 
     python model/inference.py --experiment_name {my_experiment} --set {set}
 
-`{set}` is the set (`Valiation set`, `Test set`) used to compute the embeddings. Call the help (`--help`) for more information. 
+`{set}` is the set (`Valiation set`, `Test set`) used to compute the embeddings. Call the help (`--help`) for more informations. 
 
 
 The out will be stored in the `/models/experiments/{experiment_name}/embeddings/` folder. In particular, two files are generated:
@@ -109,7 +109,7 @@ The out will be stored in the `/models/experiments/{experiment_name}/embeddings/
  - `df_embeddings_{set}.csv`: embeddings for each example
  - `df_genres_{set}.csv`: name of each example together with the predicted genre
 
-The generated .csv are compliant with the input of the [Embedding Projector by Tensorflow](https://projector.tensorflow.org)
+The generated files are compliant with the input of the [Embedding Projector by Tensorflow](https://projector.tensorflow.org)
 
 
 
