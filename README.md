@@ -1,7 +1,32 @@
 Music-Genre-Classification
 ==============================
 
-Music genre classification using CNN
+Music genre classification using [GTZAN dataset](https://www.kaggle.com/datasets/andradaolteanu/gtzan-dataset-music-genre-classification), a dataset containing 1000 labeled audio files of 10 different genres. 
+
+The model takes as input the Mel Spectrogram of the song and analyzes the image using a Convolutional Neural Network (CNN). The output is a vector containing the score associated to each genre.
+
+
+# Dataset
+
+The dataset contains 1000 labeled audio files (belonging to famous songs) of 10 different genres. The genres are
+
+ - Blues
+ - Classical
+ - Country
+ - Disco
+ - HipHop
+ - Jazz
+ - Metal
+ - Pop
+ - Raggae
+ - Rock
+
+
+
+The dataset can be downloaded [here](https://www.kaggle.com/datasets/andradaolteanu/gtzan-dataset-music-genre-classification). Place the content in `data/raw/` folder. For this project only the folder `genres_original` will be used. It contains the audio files in .wav format.
+
+
+
 
 
 
