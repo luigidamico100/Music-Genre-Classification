@@ -83,9 +83,7 @@ Project Organization
     ├── notebooks          <- Jupyter notebooks. Naming convention is a number (for ordering),
     │   ├── 1.0-exploration.ipynb
     │   ├── 2.0-google-colab.ipynb
-    │
-    ├── reports            <- Generated analysis as HTML, PDF, LaTeX, etc.
-    │   └── figures        <- Generated graphics and figures to be used in reporting
+    │   └── 3.0-visualize_embeddings.ipynb
     │
     ├── requirements.txt  
     │
@@ -99,11 +97,11 @@ Project Organization
     │   ├── models         <- Scripts to train models and then use trained models to make
     │   │   │                 predictions
     │   │   ├── config.py
-    │   │   └── cnn.py
-    │   │   └── dataset.py
-    │   │   └── train.py
-    │   │   └── evaluate.py
-    │   │   └── embeddings.py
+    │   │   ├── cnn.py
+    │   │   ├── dataset.py
+    │   │   ├── train.py
+    │   │   ├── evaluate.py
+    │   │   ├── embeddings.py
     │   │   └── inference.py
     │   │
     │   └── visualization  <- Scripts to create exploratory and results oriented visualizations

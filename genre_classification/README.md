@@ -45,9 +45,9 @@ This script take as input the annotation file in `path_annotations` and execute 
 
 The output will be stored in the `/models/experiments/{experiment_name}/training/` folder. In particular, tree files are generated:
 
- - `training_plot.jpg` 
- - `df_training_history.csv`
- - `training_log.log` 
+ - `training_plot.jpg`: training and validation loss and accuracy over different epochs
+ - `df_training_history.csv`: training and validation loss and accuracy over different epochs
+ - `training_log.log`: training phase log
 
 
 
@@ -64,9 +64,9 @@ To evaluate the model run
 
 The output will be stored in the `/models/experiments/{experiment_name}/evaluation/` folder. In particular, tree files are generated:
 
- - `metrics_{set}.txt` 
- - `df_confusion_matrix_{set}.csv`
- - `df_confusion_matrix_norm_{set}.csv`  
+ - `metrics_{set}.txt`: accuracy and f1 score
+ - `df_confusion_matrix_{set}.csv`: confusion matrix
+ - `df_confusion_matrix_norm_{set}.csv`: confusion matrix normalized by rows
 
 
 ### Generate embeddings
