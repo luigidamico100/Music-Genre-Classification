@@ -8,7 +8,7 @@ The model takes as input the Mel Spectrogram of the song and analyzes the image 
 
 # Dataset
 
-The dataset contains 1000 labeled audio files (belonging to famous songs) of 10 different genres. The genres are
+The dataset contains 1000 labeled audio files (belonging to famous songs) all having a length of 30 seconds of 10 different genres. The genres are:
 
  - Blues
  - Classical
