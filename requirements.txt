@@ -1,95 +1,97 @@
 anyio==3.6.1
 appdirs==1.4.4
 appnope==0.1.3
-argon2-cffi @ file:///opt/conda/conda-bld/argon2-cffi_1645000214183/work
-argon2-cffi-bindings @ file:///opt/concourse/worker/volumes/live/42cf1b28-e71f-45ed-47b2-50f828088636/volume/argon2-cffi-bindings_1644569709119/work
-asttokens @ file:///opt/conda/conda-bld/asttokens_1646925590279/work
-attrs @ file:///opt/conda/conda-bld/attrs_1642510447205/work
+argon2-cffi==21.3.0
+argon2-cffi-bindings==21.2.0
+asttokens==2.0.5
+attrs==21.4.0
 audioread==2.1.9
-backcall @ file:///home/ktietz/src/ci/backcall_1611930011877/work
-beautifulsoup4 @ file:///private/var/folders/sy/f16zz6x50xz3113nwtb9bvq00000gp/T/abs_croot-cdiouih5/beautifulsoup4_1650462164803/work
-bleach @ file:///opt/conda/conda-bld/bleach_1641577558959/work
-certifi @ file:///private/var/folders/sy/f16zz6x50xz3113nwtb9bvq00000gp/T/abs_83242e7e-f82d-4a71-8ef2-9d71d212d249gu_wxmeq/croots/recipe/certifi_1655968827803/work/certifi
-cffi @ file:///private/var/folders/sy/f16zz6x50xz3113nwtb9bvq00000gp/T/abs_62rp5d8fd4/croots/recipe/cffi_1659598655556/work
+backcall==0.2.0
+beautifulsoup4==4.11.1
+bleach==4.1.0
+certifi==2022.6.15
+cffi==1.15.1
 charset-normalizer==2.1.0
 click==8.1.3
 cloudpickle==2.1.0
 cycler==0.11.0
 debugpy==1.6.2
-decorator @ file:///opt/conda/conda-bld/decorator_1643638310831/work
-defusedxml @ file:///tmp/build/80754af9/defusedxml_1615228127516/work
-entrypoints @ file:///opt/concourse/worker/volumes/live/78b2c4ae-da17-4aa7-7fdc-138f840abf07/volume/entrypoints_1649926486598/work
-executing @ file:///opt/conda/conda-bld/executing_1646925071911/work
+decorator==5.1.1
+defusedxml==0.7.1
+entrypoints==0.4
+executing==0.8.3
 fastapi==0.79.1
-fastjsonschema @ file:///tmp/build/80754af9/python-fastjsonschema_1620414857593/work/dist
+fastjsonschema==2.15.1
 fonttools==4.34.4
 h11==0.13.0
 idna==3.3
 ipykernel==6.15.1
-ipython @ file:///private/var/folders/sy/f16zz6x50xz3113nwtb9bvq00000gp/T/abs_651b0309-eccd-4278-bb05-da83352f345cw81ya025/croots/recipe/ipython_1657652219297/work
-ipython-genutils @ file:///tmp/build/80754af9/ipython_genutils_1606773439826/work
-jedi @ file:///opt/concourse/worker/volumes/live/89be3eb0-a85c-453b-67dd-f706f2fa4c43/volume/jedi_1644315269953/work
-Jinja2 @ file:///opt/conda/conda-bld/jinja2_1647436528585/work
+ipython==8.4.0
+ipython-genutils==0.2.0
+jedi==0.18.1
+Jinja2==3.0.3
 joblib==1.1.0
-jsonschema @ file:///opt/concourse/worker/volumes/live/4dfc22c3-c342-49fd-67d7-73b2208a33ed/volume/jsonschema_1650025962276/work
+jsonschema==4.4.0
 julius==0.2.6
 jupyter-client==7.3.4
 jupyter-core==4.11.1
-jupyterlab-pygments @ file:///tmp/build/80754af9/jupyterlab_pygments_1601490720602/work
+jupyterlab-pygments==0.1.2
 kiwisolver==1.4.4
 librosa==0.9.2
 llvmlite==0.39.0
-MarkupSafe @ file:///private/var/folders/sy/f16zz6x50xz3113nwtb9bvq00000gp/T/abs_d4a9444f-bd4c-4043-b47d-cede33979b0fve7bm42r/croots/recipe/markupsafe_1654597878200/work
+MarkupSafe==2.1.1
 matplotlib==3.5.2
 matplotlib-inline==0.1.3
-mistune @ file:///opt/concourse/worker/volumes/live/4217afd5-dad1-438d-6f79-e4992ccda0e5/volume/mistune_1607364880245/work
--e git+https://github.com/luigidamico100/Music-Genre-Classification.git@7a4ab438db25c03cfced56e1369b5cac7c283d17#egg=Music_Genre_Classification
-nbclient @ file:///opt/concourse/worker/volumes/live/fcea0efc-2a08-48fd-5c55-85ef78e0ea28/volume/nbclient_1650308406463/work
-nbconvert @ file:///private/var/folders/sy/f16zz6x50xz3113nwtb9bvq00000gp/T/abs_croot-mv2swkk7/nbconvert_1649751922903/work
-nbformat @ file:///opt/concourse/worker/volumes/live/e5e6b676-4ecd-4e4b-6788-218f8025991a/volume/nbformat_1649844957789/work
-nest-asyncio @ file:///opt/concourse/worker/volumes/live/ddf592a1-304c-41a6-6d59-2d4687652b8f/volume/nest-asyncio_1649847942674/work
-notebook @ file:///private/var/folders/sy/f16zz6x50xz3113nwtb9bvq00000gp/T/abs_98mevid06x/croots/recipe/notebook_1659083668559/work
+mistune==0.8.4
+Music-Genre-Classification==0.1.0
+nbclient==0.5.13
+nbconvert==6.4.4
+nbformat==5.3.0
+nest-asyncio==1.5.5
+notebook==6.4.12
 numba==0.56.0
 numpy==1.22.4
-packaging @ file:///tmp/build/80754af9/packaging_1637314298585/work
+packaging==21.3
 pandas==1.4.3
-pandocfilters @ file:///opt/conda/conda-bld/pandocfilters_1643405455980/work
-parso @ file:///opt/conda/conda-bld/parso_1641458642106/work
-pexpect @ file:///tmp/build/80754af9/pexpect_1605563209008/work
-pickleshare @ file:///tmp/build/80754af9/pickleshare_1606932040724/work
+pandocfilters==1.5.0
+parso==0.8.3
+pexpect==4.8.0
+pickleshare==0.7.5
 Pillow==9.2.0
+pip==22.1.2
 pooch==1.6.0
 primePy==1.3
-prometheus-client @ file:///private/var/folders/sy/f16zz6x50xz3113nwtb9bvq00000gp/T/abs_19kjbndib7/croots/recipe/prometheus_client_1659455105394/work
+prometheus-client==0.14.1
 prompt-toolkit==3.0.30
 psutil==5.9.1
-ptyprocess @ file:///tmp/build/80754af9/ptyprocess_1609355006118/work/dist/ptyprocess-0.7.0-py2.py3-none-any.whl
-pure-eval @ file:///opt/conda/conda-bld/pure_eval_1646925070566/work
-pycparser @ file:///tmp/build/80754af9/pycparser_1636541352034/work
+ptyprocess==0.7.0
+pure-eval==0.2.2
+pycparser==2.21
 pydantic==1.9.2
 pydentic==0.0.1.dev3
 Pygments==2.12.0
 pyparsing==3.0.9
-pyrsistent @ file:///opt/concourse/worker/volumes/live/76cffa60-bd33-4155-4e83-ea03c38b1294/volume/pyrsistent_1636111020441/work
-python-dateutil @ file:///tmp/build/80754af9/python-dateutil_1626374649649/work
+pyrsistent==0.18.0
+python-dateutil==2.8.2
 python-stdnum==1.17
 pytz==2022.1
-pyzmq @ file:///private/var/folders/sy/f16zz6x50xz3113nwtb9bvq00000gp/T/abs_15f7a459-ad98-422b-b8da-cbf1f626e2115nt0ocwy/croots/recipe/pyzmq_1657724193704/work
+pyzmq==23.2.0
 requests==2.28.1
 resampy==0.3.1
 scikit-learn==1.1.2
 scipy==1.9.0
 seaborn==0.11.2
-Send2Trash @ file:///tmp/build/80754af9/send2trash_1632406701022/work
-six @ file:///tmp/build/80754af9/six_1644875935023/work
+Send2Trash==1.8.0
+setuptools==61.2.0
+six==1.16.0
 sniffio==1.2.0
 SoundFile==0.10.3.post1
-soupsieve @ file:///tmp/build/80754af9/soupsieve_1636706018808/work
+soupsieve==2.3.1
 spyder-kernels==2.3.2
-stack-data @ file:///opt/conda/conda-bld/stack_data_1646927590127/work
+stack-data==0.2.0
 starlette==0.19.1
-terminado @ file:///opt/concourse/worker/volumes/live/1e61dc32-e381-4730-4e5e-6cfec5c3c4a5/volume/terminado_1644322614203/work
-testpath @ file:///private/var/folders/sy/f16zz6x50xz3113nwtb9bvq00000gp/T/abs_aaf4aec7-dbb6-43d6-9707-824338b4efc82yrt6xjp/croots/recipe/testpath_1655908558843/work
+terminado==0.13.1
+testpath==0.6.0
 threadpoolctl==3.1.0
 torch==1.12.1
 torch-audiomentations==0.11.0
@@ -101,10 +103,11 @@ torchmetrics==0.9.3
 torchvision==0.13.1
 tornado==6.2
 traitlets==5.3.0
-typing_extensions @ file:///private/var/folders/sy/f16zz6x50xz3113nwtb9bvq00000gp/T/abs_ff5_5nqr6l/croots/recipe/typing_extensions_1659638832447/work
+typing_extensions==4.3.0
 urllib3==1.26.11
 uvicorn==0.18.2
 wavaugment==0.2
-wcwidth @ file:///Users/ktietz/demo/mc3/conda-bld/wcwidth_1629357192024/work
+wcwidth==0.2.5
 webencodings==0.5.1
+wheel==0.37.1
 wurlitzer==3.0.2
