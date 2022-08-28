@@ -47,9 +47,9 @@ Type the following instruction to clone the environment
 
 
 ###  Install from requirements
-The requirements has been generated using
+The requirements has been generated using (check [this](https://stackoverflow.com/questions/62885911/pip-freeze-creates-some-weird-path-instead-of-the-package-version)):
 
-    pip freeze > requirements.txt
+    pip list --format=freeze > requirements.txt
 
 
 Install package requirements using pip 
