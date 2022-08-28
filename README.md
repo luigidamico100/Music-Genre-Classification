@@ -74,7 +74,7 @@ The project folder [genre_classification](genre_classification) is installed as 
 
 # API service
 
-Once an experiment is executed (follow the guide in [genre_classification](genre_classification)), the API service can be used. The API service is used to make inference on a new and unlabeled wav file located in `/data/external` folder.
+Once an experiment is executed and a trained model is ready in [models/experiments](models/experiments) (follow the guide in [genre_classification](genre_classification)), the API service can be used. The API service is used to make inference on a new and unlabeled wav file located in `/data/external` folder.
 
 Start the server by running
 
