@@ -24,7 +24,7 @@ app = FastAPI()
 # Index route, opens automatically on http://127.0.0.1:8000
 @app.get('/')
 def index():
-    return {'message': 'Hello, World'}
+    return {'message': 'Music genre classification project!'}
 
 
 # Route with a single parameter, returns the parameter within a message
