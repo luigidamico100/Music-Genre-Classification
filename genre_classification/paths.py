@@ -21,6 +21,9 @@ path_training_experiments = os.path.join(project_root_path, 'models', 'experimen
 # External wav data used for inference
 path_external_wav = os.path.join(project_root_path, 'data', 'external')
 
+# Figures
+path_figure_EDA = os.path.join(project_root_path, 'reports', 'EDA.jpg')
+
 
 def get_path_experiment(experiment_name, file_type, overwrite_existing_experiment=True):
     """
